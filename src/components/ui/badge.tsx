@@ -1,7 +1,7 @@
 import type { HTMLAttributes, ReactNode } from "react"
 import { cn } from "@/lib/utils"
 
-type BadgeTone = "success" | "warning" | "neutral"
+type BadgeTone = "success" | "warning" | "neutral" | "danger" | "info"
 
 type BadgeProps = HTMLAttributes<HTMLSpanElement> & {
   children: ReactNode
@@ -11,6 +11,8 @@ type BadgeProps = HTMLAttributes<HTMLSpanElement> & {
 const toneClasses: Record<BadgeTone, string> = {
   success: "bg-[var(--hanooot-success-soft)] text-[var(--hanooot-success)]",
   warning: "bg-[var(--hanooot-warning-soft)] text-[var(--hanooot-warning)]",
+  danger: "bg-[#F7E4DE] text-[#A6432F]",
+  info: "bg-[#E7EEFB] text-[#1D4ED8]",
   neutral: "bg-[var(--hanooot-active)] text-[var(--hanooot-muted)]",
 }
 

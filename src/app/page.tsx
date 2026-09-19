@@ -1,5 +1,5 @@
-import OverviewPage from "@/sections/overview/OverviewPage"
+import HanoootWorkspace from "@/sections/hanooot/HanoootWorkspace"
 
-const Page = () => <OverviewPage />
+const Page = () => <HanoootWorkspace />
 
 export default Page
