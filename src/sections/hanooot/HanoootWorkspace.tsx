@@ -1,8 +1,9 @@
 "use client"
 
+import Link from "next/link"
 import { useMemo, useState } from "react"
 
-type ModuleId = "overview" | "importing" | "settings" | "messages" | "drive" | "hr" | "legal"
+export type ModuleId = "overview" | "importing" | "settings" | "messages" | "drive" | "hr" | "legal"
 type Tone = "blue" | "green" | "amber" | "purple" | "red" | "neutral"
 
 type Row = { id: string; cells: string[] }
@@ -283,19 +284,18 @@ const modules: ModulePage[] = [
   },
 ]
 
-const RailIcon = ({ module, active, onClick }: { module: ModulePage; active: boolean; onClick: () => void }) => (
-  <button
+const RailIcon = ({ module, active }: { module: ModulePage; active: boolean }) => (
+  <Link
     aria-current={active ? "page" : undefined}
     className={`grid w-[60px] place-items-center gap-[5px] rounded-[18px] px-0 pb-[7px] pt-[9px] text-center transition ${
       active ? "bg-[#EDE9E0] text-[#2F2A23]" : "text-[#CFC9B8] hover:text-[#EDE9E0]"
     }`}
-    onClick={onClick}
+    href={`/${module.id}`}
     title={module.label}
-    type="button"
   >
     <span className="text-[20px] leading-none">{module.icon}</span>
     <span className="text-[9.5px] font-semibold leading-tight">{module.short}</span>
-  </button>
+  </Link>
 )
 
 const Badge = ({ children, tone = "neutral" }: { children: React.ReactNode; tone?: Tone }) => (
@@ -419,7 +419,7 @@ const RealModuleScreens = ({ moduleId }: { moduleId: ModuleId }) => {
   return <section data-native-screen="legal-client-services-documents" className="grid gap-4 xl:grid-cols-3"><DetailCard kicker="CLIENT SERVICES" title="Legal dashboard" tone="purple"><div className="grid gap-2"><MiniField label="Billable month" value="SAR 74K" /><MiniField label="Pipeline by service" value="Retainers · Matters · Enquiries" /><MiniButton tone="purple">Create enquiry</MiniButton></div></DetailCard><DetailCard kicker="NEEDS ATTENTION" title="Enquiries and retainers" tone="red"><DataTable columns={["Matter", "Service", "Owner", "State"]} rows={[{id:"l1",cells:["LEG-44","Retainer","Mariam","Renewal"]},{id:"l2",cells:["LEG-51","Import contract","Counsel","Clause review"]},{id:"l3",cells:["LEG-57","Client enquiry","Salim","Missing KYC"]}]} /></DetailCard><DetailCard kicker="DOCUMENTS" title="Legal document generator" tone="blue"><div className="grid gap-2"><MiniField label="Matter files" value="Drive linked" /><MiniField label="Owner review" value="Required" /><MiniField label="Retainer packet" value="Generated draft" /></div></DetailCard></section>
 }
 
-const ModuleView = ({ page }: { page: ModulePage }) => (
+const ModuleView = ({ page, detailSurface }: { page: ModulePage; detailSurface?: string }) => (
   <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
     <div className="flex h-[56px] flex-none items-center gap-3 border-b border-[#E4E0D6] bg-white px-6">
       <span className="text-[15.5px] font-semibold tracking-[-0.015em] text-[#3C382F]">{page.title}</span>
@@ -442,6 +442,14 @@ const ModuleView = ({ page }: { page: ModulePage }) => (
         </section>
 
         <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">{page.stats.map((item) => <StatCard item={item} key={item.title} />)}</section>
+
+        {detailSurface ? (
+          <section className="rounded-[22px] border border-[#E4E0D6] bg-white p-5 shadow-[0_8px_24px_rgba(40,36,30,0.06)]" data-route-detail={detailSurface}>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.09em] text-[#78736A]">APP ROUTE DETAIL PAGE</p>
+            <h2 className="mt-2 text-[19px] font-semibold text-[#3C382F]">{detailSurface}</h2>
+            <p className="mt-2 text-[12.5px] leading-5 text-[#78736A]">This is a real Next.js app-folder page for the selected Hanooot detail surface, sharing the exact native shell/sidebar/navbar and module UI instead of loading the standalone HTML file.</p>
+          </section>
+        ) : null}
 
         <section className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_330px]">
           <div className="space-y-4">
@@ -486,8 +494,13 @@ const ModuleView = ({ page }: { page: ModulePage }) => (
   </div>
 )
 
-const HanoootWorkspace = () => {
-  const [activeId, setActiveId] = useState<ModuleId>("overview")
+type HanoootWorkspaceProps = {
+  moduleId?: ModuleId
+  detailSurface?: string
+}
+
+const HanoootWorkspace = ({ moduleId = "overview", detailSurface }: HanoootWorkspaceProps) => {
+  const activeId = moduleId
   const [rolesOpen, setRolesOpen] = useState(false)
   const [bugOpen, setBugOpen] = useState(false)
   const activePage = useMemo(() => modules.find((module) => module.id === activeId) ?? modules[0], [activeId])
@@ -496,9 +509,9 @@ const HanoootWorkspace = () => {
     <main className="h-screen overflow-hidden bg-[#F5F3EE] font-[Tajawal,ui-sans-serif,system-ui] text-[#3C382F]" dir="ltr">
       <div className="flex h-full overflow-hidden">
         <aside className="hidden w-[76px] flex-none flex-col items-center bg-[#2F2A23] py-4 text-[#EDE9E0] shadow-[10px_0_30px_rgba(40,36,30,0.16)] lg:flex">
-          <button className="grid h-11 w-11 place-items-center rounded-[16px] bg-[#EDE9E0] text-[22px] font-bold text-[#2F2A23]" onClick={() => setActiveId("overview")} type="button">H</button>
+          <Link className="grid h-11 w-11 place-items-center rounded-[16px] bg-[#EDE9E0] text-[22px] font-bold text-[#2F2A23]" href="/overview">H</Link>
           <nav className="mt-7 flex flex-1 flex-col items-center gap-2" aria-label="Hanooot modules">
-            {modules.map((module) => <RailIcon active={activeId === module.id} key={module.id} module={module} onClick={() => setActiveId(module.id)} />)}
+            {modules.map((module) => <RailIcon active={activeId === module.id} key={module.id} module={module} />)}
           </nav>
           <div className="grid gap-3">
             <button className="relative grid h-10 w-10 place-items-center rounded-[16px] bg-white/10 text-[13px] font-semibold text-[#CFC9B8]" type="button">!<span className="absolute -right-1 -top-1 grid h-4 min-w-4 place-items-center rounded-full bg-[#A8453F] px-1 text-[10px] text-white">4</span></button>
@@ -507,11 +520,11 @@ const HanoootWorkspace = () => {
           </div>
         </aside>
 
-        <ModuleView page={activePage} />
+        <ModuleView detailSurface={detailSurface} page={activePage} />
       </div>
 
       <div className="fixed inset-x-0 bottom-0 z-30 flex border-t border-[#E4E0D6] bg-[#2F2A23] p-2 lg:hidden">
-        {modules.map((module) => <button className={`flex-1 rounded-[14px] px-2 py-2 text-[11px] font-semibold ${activeId === module.id ? "bg-[#EDE9E0] text-[#2F2A23]" : "text-[#CFC9B8]"}`} key={module.id} onClick={() => setActiveId(module.id)} type="button">{module.short}</button>)}
+        {modules.map((module) => <Link className={`flex-1 rounded-[14px] px-2 py-2 text-center text-[11px] font-semibold ${activeId === module.id ? "bg-[#EDE9E0] text-[#2F2A23]" : "text-[#CFC9B8]"}`} href={`/${module.id}`} key={module.id}>{module.short}</Link>)}
       </div>
 
       {rolesOpen ? (
