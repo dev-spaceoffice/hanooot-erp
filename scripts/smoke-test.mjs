@@ -4,7 +4,6 @@ import path from "node:path"
 const root = process.cwd()
 const requiredFiles = [
   "public/hanooot-standalone.html",
-  "src/sections/hanooot/ExactPrototypeFrame.tsx",
   "src/sections/hanooot/HanoootWorkspace.tsx",
   "src/data/hanooot.ts",
   "src/types/hanooot.ts",
@@ -75,6 +74,16 @@ for (const table of requiredTables) {
   if (!migration.includes(`'${table}'`)) {
     throw new Error(`RLS loop missing table: ${table}`)
   }
+}
+
+const workspace = fs.readFileSync(path.join(root, "src/sections/hanooot/HanoootWorkspace.tsx"), "utf8")
+for (const text of ["Overview", "Importing", "Settings", "Messages", "Drive", "HR", "Legal", "SIGNED IN AS", "REPORT A BUG"]) {
+  if (!workspace.includes(text)) {
+    throw new Error(`Native workspace missing UI text: ${text}`)
+  }
+}
+if (fs.readFileSync(path.join(root, "src/app/page.tsx"), "utf8").includes("ExactPrototypeFrame")) {
+  throw new Error("Primary route still uses the iframe prototype shortcut")
 }
 
 const prototypeHtml = fs.readFileSync(path.join(root, "public/hanooot-standalone.html"), "utf8")

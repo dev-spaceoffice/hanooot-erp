@@ -21,3 +21,7 @@
 ## Same-to-same prototype pass
 
 The primary `/` route now renders `public/hanooot-standalone.html` inside a full-viewport iframe. This preserves the complete attached standalone prototype as the user requested, including its bundled layout, module UI, interactions, typography, rail/header proportions, activity/bug/role surfaces, and all embedded module resources. The React/Supabase foundation remains in the repository for the production rebuild, but the reviewable UI is the exact provided HTML asset.
+
+## Native frontend pass
+
+The primary `/` route now renders native React/TypeScript Hanooot ERP module pages rather than the iframe shortcut. The standalone HTML remains in `public/hanooot-standalone.html` as the visual reference, while the active frontend implements the attached design language directly: 76px dark rail, 56px module header, warm ivory canvas, compact cards/tables/kanban boards, signed-in role panel, report-a-bug modal, and all required module pages.

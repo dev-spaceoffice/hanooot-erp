@@ -1,217 +1,468 @@
 "use client"
 
 import { useMemo, useState } from "react"
-import { activityEvents, featureCoverage, integrationConnections, moduleSections } from "@/data/hanooot"
-import type { HanoootModuleId, ModuleSection, Tone } from "@/types/hanooot"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { DashboardShell } from "@/components/shell/dashboard-shell"
-import { KanbanShell } from "@/components/ui/kanban-shell"
-import { LoginPanel } from "@/components/shell/login-panel"
-import { Table } from "@/components/ui/table"
-import { cn } from "@/lib/utils"
 
-const toneBadge: Record<Tone, "neutral" | "success" | "warning" | "danger" | "info"> = {
-  neutral: "neutral",
-  success: "success",
-  warning: "warning",
-  danger: "danger",
-  info: "info",
+type ModuleId = "overview" | "importing" | "settings" | "messages" | "drive" | "hr" | "legal"
+type Tone = "blue" | "green" | "amber" | "purple" | "red" | "neutral"
+
+type Row = { id: string; cells: string[] }
+type CardItem = { title: string; meta: string; value?: string; tone?: Tone }
+type ModulePage = {
+  id: ModuleId
+  label: string
+  short: string
+  icon: string
+  eyebrow: string
+  title: string
+  subtitle: string
+  primaryAction: string
+  stats: CardItem[]
+  columns: { title: string; items: CardItem[] }[]
+  tableTitle: string
+  tableColumns: string[]
+  tableRows: Row[]
+  sideTitle: string
+  sideItems: CardItem[]
+  footerActions: string[]
 }
 
-const moduleTabs = moduleSections.map((section) => ({ id: section.id, title: section.title }))
+const toneClass: Record<Tone, string> = {
+  blue: "bg-[#E7EEFB] text-[#1D4ED8] border-[#CAD8F6]",
+  green: "bg-[#E6F2EA] text-[#2F8F63] border-[#CDE7D5]",
+  amber: "bg-[#FBF4E4] text-[#8A5A12] border-[#F1DCAC]",
+  purple: "bg-[#EFE9F3] text-[#5B4B9A] border-[#DFD2EA]",
+  red: "bg-[#F4E3E1] text-[#A2402F] border-[#E6C3BD]",
+  neutral: "bg-[#EFEDE6] text-[#78736A] border-[#E4E0D6]",
+}
 
-const MetricCard = ({ detail, label, tone, value }: ModuleSection["metrics"][number]) => (
-  <Card className="min-h-34">
-    <div className="flex items-start justify-between gap-3">
-      <p className="text-sm font-bold text-[var(--hanooot-muted)]">{label}</p>
-      <Badge tone={toneBadge[tone]}>{tone}</Badge>
-    </div>
-    <p className="mt-4 text-3xl font-black text-[var(--hanooot-ink)]" dir="ltr">
-      {value}
-    </p>
-    <p className="mt-2 text-sm font-bold text-[var(--hanooot-muted)]">{detail}</p>
-  </Card>
+const modules: ModulePage[] = [
+  {
+    id: "overview",
+    label: "Overview",
+    short: "Home",
+    icon: "⌂",
+    eyebrow: "PLATFORM ACTIVITY",
+    title: "Overview",
+    subtitle: "A single warm-neutral command center for revenue, open work, shipments, headcount, legal pipeline, branches, activity, alerts, and department handoff.",
+    primaryAction: "Open activity",
+    stats: [
+      { title: "Revenue MTD", value: "SAR 482K", meta: "+12% from last month", tone: "green" },
+      { title: "Open work items", value: "27", meta: "6 urgent approvals", tone: "amber" },
+      { title: "Shipments in transit", value: "14", meta: "3 need documents", tone: "blue" },
+      { title: "Legal pipeline", value: "9", meta: "2 need owner review", tone: "red" },
+    ],
+    columns: [
+      { title: "Today", items: [{ title: "VAT mismatch", meta: "Finance settings · needs super-admin", value: "High", tone: "red" }] },
+      { title: "In progress", items: [{ title: "Quote PDF prepared", meta: "Order PO-388 · Importing", value: "Ready", tone: "green" }] },
+      { title: "Watching", items: [{ title: "New legal enquiry", meta: "Client services · Mariam", value: "Today", tone: "blue" }] },
+    ],
+    tableTitle: "Branches",
+    tableColumns: ["Branch", "Live deals", "Orders", "Owner"],
+    tableRows: [
+      { id: "riyadh", cells: ["Riyadh", "18", "7 in transit", "Abeer"] },
+      { id: "jeddah", cells: ["Jeddah", "11", "4 customs", "Salim"] },
+      { id: "dubai", cells: ["Dubai", "6", "2 quote review", "Mariam"] },
+    ],
+    sideTitle: "Recent activity",
+    sideItems: [
+      { title: "Facebook lead synced", meta: "Importing · 12 min ago", tone: "blue" },
+      { title: "Bill of lading linked", meta: "Drive · 1 hr ago", tone: "green" },
+      { title: "Retainer renewal flagged", meta: "Legal · today", tone: "red" },
+    ],
+    footerActions: ["Report a bug", "Mark read", "Open department", "Switch role"],
+  },
+  {
+    id: "importing",
+    label: "Importing",
+    short: "Trade",
+    icon: "⇄",
+    eyebrow: "TRADE OPERATIONS • FACEBOOK SYNC ACTIVE • LAST RUN 12 MIN AGO",
+    title: "Importing",
+    subtitle: "Leads, campaigns, calls, pipeline, sourcing, orders, products, contacts, shipments, quote PDF actions, and mocked Facebook/Zoho/WhatsApp surfaces.",
+    primaryAction: "New lead",
+    stats: [
+      { title: "Deals won / week", value: "8", meta: "3 created orders", tone: "green" },
+      { title: "Lead response SLA", value: "92%", meta: "Under 15 minutes", tone: "green" },
+      { title: "Orders in transit", value: "14", meta: "5 need customs docs", tone: "amber" },
+      { title: "Quote value", value: "USD 63K", meta: "PDF-ready drafts", tone: "blue" },
+    ],
+    columns: [
+      { title: "New lead", items: [{ title: "Facebook form: bulk spices", meta: "Campaign · Ramadan imports", value: "Call 1", tone: "blue" }, { title: "Ad form: kitchenware", meta: "Assignee · Abeer", value: "New", tone: "neutral" }] },
+      { title: "Sourcing", items: [{ title: "CN supplier photos", meta: "QR workflow · comments open", value: "RMB 18,400", tone: "amber" }] },
+      { title: "Won → Order", items: [{ title: "Zoho draft quote", meta: "Drop-to-won creates PO", value: "USD 21,700", tone: "green" }] },
+    ],
+    tableTitle: "Orders and shipment flow",
+    tableColumns: ["Order", "Customer", "Stage", "Quote", "Shipment"],
+    tableRows: [
+      { id: "po-241", cells: ["PO-241", "Noura Trading", "Supplier photos", "Priced", "Shanghai → Jeddah"] },
+      { id: "po-309", cells: ["PO-309", "Gulf Retail", "Customs", "PDF generated", "Ningbo → Dammam"] },
+      { id: "po-388", cells: ["PO-388", "Spice Market", "Quote approval", "Needs RMB conversion", "Dubai hub"] },
+    ],
+    sideTitle: "Integration surfaces",
+    sideItems: [
+      { title: "Facebook Lead Ads", meta: "Mock sync writes leads and sync_runs", tone: "blue" },
+      { title: "Zoho Books", meta: "Draft quotes only · no live call", tone: "amber" },
+      { title: "WhatsApp bulk", meta: "Queued outbound_action", tone: "green" },
+    ],
+    footerActions: ["Source", "Campaign", "Call attempt", "Advance", "Lost", "Generate quote PDF", "Export CSV"],
+  },
+  {
+    id: "settings",
+    label: "Settings",
+    short: "Admin",
+    icon: "⚙",
+    eyebrow: "PLATFORM WIDE • READ ONLY STATES",
+    title: "Settings",
+    subtitle: "Organisation, active departments, users, access grants, authority matrix, base currency, sales tax, exchange rates, and notification rules.",
+    primaryAction: "Create user",
+    stats: [
+      { title: "Active departments", value: "7", meta: "All core modules enabled", tone: "green" },
+      { title: "Role grants", value: "32", meta: "5 read-only authority rows", tone: "blue" },
+      { title: "Base currency", value: "SAR", meta: "VAT 15%", tone: "neutral" },
+      { title: "Exchange rates", value: "4", meta: "RMB/USD/SAR/AED", tone: "amber" },
+    ],
+    columns: [
+      { title: "Admin", items: [{ title: "Organisation settings", meta: "Create users and departments", value: "Open", tone: "green" }] },
+      { title: "Department", items: [{ title: "Importing manager", meta: "Lead + order approvals", value: "Write", tone: "blue" }] },
+      { title: "Locked", items: [{ title: "Tax setup", meta: "Super-admin explanatory copy", value: "Locked", tone: "amber" }] },
+    ],
+    tableTitle: "People directory",
+    tableColumns: ["Name", "Organisation", "Phone", "Type", "Used By"],
+    tableRows: [
+      { id: "u1", cells: ["Salim", "The Spice", "+966 500 000 001", "Super admin", "All modules"] },
+      { id: "u2", cells: ["Abeer", "Hanooot", "+966 500 000 002", "Importer", "Leads, Orders"] },
+      { id: "u3", cells: ["Mariam", "External Counsel", "+971 500 000 003", "Read only", "Legal"] },
+    ],
+    sideTitle: "Finance settings",
+    sideItems: [
+      { title: "Base currency", meta: "SAR · controlled setting", tone: "neutral" },
+      { title: "Sales tax", meta: "15% · super-admin locked", tone: "amber" },
+      { title: "Notification rules", meta: "Activity, mentions, orders, legal", tone: "blue" },
+    ],
+    footerActions: ["Grant access", "Update VAT", "Edit rate", "Create rule"],
+  },
+  {
+    id: "messages",
+    label: "Messages",
+    short: "Chat",
+    icon: "✉",
+    eyebrow: "GROUPS • MENTIONS • RECORD HISTORY",
+    title: "Messages",
+    subtitle: "New group, people search, threads, replies, mentions, activity handoff, linked record panels, and empty states.",
+    primaryAction: "New group",
+    stats: [
+      { title: "Open threads", value: "19", meta: "5 mentions unread", tone: "amber" },
+      { title: "Groups", value: "6", meta: "Importing, HR, Legal", tone: "blue" },
+      { title: "Linked records", value: "41", meta: "Deals, files, matters", tone: "green" },
+      { title: "SLA replies", value: "88%", meta: "Same business day", tone: "neutral" },
+    ],
+    columns: [
+      { title: "Unread", items: [{ title: "Need invoice copy", meta: "Drive link missing", value: "@Finance", tone: "amber" }] },
+      { title: "Active", items: [{ title: "Customer CN search", meta: "Importing record thread", value: "@Abeer", tone: "blue" }] },
+      { title: "Resolved", items: [{ title: "Leave approval", meta: "HR record history", value: "Done", tone: "green" }] },
+    ],
+    tableTitle: "Thread inbox",
+    tableColumns: ["Thread", "Linked To", "Last Reply", "Mention"],
+    tableRows: [
+      { id: "msg-1", cells: ["Supplier photos review", "Sourcing SRC-18", "9 min ago", "@Abeer"] },
+      { id: "msg-2", cells: ["Legal contract clause", "Matter LEG-44", "1 hr ago", "@Mariam"] },
+      { id: "msg-3", cells: ["Payroll note", "August payroll", "Yesterday", "@HR"] },
+    ],
+    sideTitle: "People search",
+    sideItems: [
+      { title: "Abeer", meta: "Importing manager · online", tone: "green" },
+      { title: "Mariam", meta: "Legal · reviewing", tone: "blue" },
+      { title: "Lina", meta: "HR admin · away", tone: "neutral" },
+    ],
+    footerActions: ["Search people", "Reply", "Mention", "Link record"],
+  },
+  {
+    id: "drive",
+    label: "Drive",
+    short: "Files",
+    icon: "▣",
+    eyebrow: "DOCUMENTS • LINKED FILES • STORAGE READY",
+    title: "Drive",
+    subtitle: "Upload surface, storage table, linked documents across Importing, HR, Legal, and Supabase Storage-ready buckets.",
+    primaryAction: "Upload",
+    stats: [
+      { title: "Stored files", value: "126", meta: "Demo seed references", tone: "green" },
+      { title: "Linked records", value: "84%", meta: "Missing links flagged", tone: "blue" },
+      { title: "Pending upload", value: "7", meta: "Mock local queue", tone: "amber" },
+      { title: "Buckets", value: "4", meta: "Shipments, quotes, HR, legal", tone: "neutral" },
+    ],
+    columns: [
+      { title: "Upload", items: [{ title: "Add shipment document", meta: "Modal-ready interaction", value: "New", tone: "blue" }] },
+      { title: "Link", items: [{ title: "Attach to matter", meta: "Legal documents", value: "Needed", tone: "amber" }] },
+      { title: "Archive", items: [{ title: "Employee record", meta: "Retention label", value: "Stored", tone: "green" }] },
+    ],
+    tableTitle: "Storage table",
+    tableColumns: ["Name", "Linked To", "Owner", "Size"],
+    tableRows: [
+      { id: "file-1", cells: ["bill-of-lading-po-309.pdf", "Order PO-309", "Abeer", "1.8 MB"] },
+      { id: "file-2", cells: ["retainer-mariam.docx", "Legal LEG-44", "Mariam", "420 KB"] },
+      { id: "file-3", cells: ["employee-id-hassan.png", "Employee EMP-07", "HR", "840 KB"] },
+    ],
+    sideTitle: "Linked areas",
+    sideItems: [
+      { title: "Importing", meta: "Shipments, supplier photos, quotes", tone: "amber" },
+      { title: "HR", meta: "Employee documents", tone: "green" },
+      { title: "Legal", meta: "Retainers and matters", tone: "blue" },
+    ],
+    footerActions: ["Add file", "Preview", "Link", "Archive"],
+  },
+  {
+    id: "hr",
+    label: "HR",
+    short: "People",
+    icon: "◌",
+    eyebrow: "PEOPLE • LEAVE • AUGUST 2026 PAYROLL",
+    title: "HR",
+    subtitle: "People, headcount, employee table, leave approve/decline, August 2026 payroll, documents, contact, annual leave, and salary panels.",
+    primaryAction: "Add employee",
+    stats: [
+      { title: "Headcount", value: "18", meta: "3 contractors", tone: "green" },
+      { title: "Leave requests", value: "5", meta: "2 await approval", tone: "amber" },
+      { title: "Payroll run", value: "Aug 2026", meta: "Draft locked", tone: "blue" },
+      { title: "Missing docs", value: "4", meta: "IDs and contracts", tone: "red" },
+    ],
+    columns: [
+      { title: "Leave", items: [{ title: "Annual leave", meta: "Approve / decline", value: "Pending", tone: "amber" }] },
+      { title: "Payroll", items: [{ title: "August 2026 run", meta: "Draft review", value: "Locked", tone: "blue" }] },
+      { title: "Documents", items: [{ title: "Employee contract", meta: "Drive link ready", value: "Ready", tone: "green" }] },
+    ],
+    tableTitle: "Employee table",
+    tableColumns: ["Employee", "Role", "Leave", "Salary Panel", "Documents"],
+    tableRows: [
+      { id: "emp-1", cells: ["Hassan", "Sourcing coordinator", "8 days", "SAR 9,500", "ID uploaded"] },
+      { id: "emp-2", cells: ["Abeer", "Importing manager", "14 days", "SAR 16,000", "Contract missing"] },
+      { id: "emp-3", cells: ["Lina", "HR admin", "11 days", "SAR 10,200", "Complete"] },
+    ],
+    sideTitle: "Employee panels",
+    sideItems: [
+      { title: "Contact", meta: "Phone and emergency details", tone: "neutral" },
+      { title: "Annual leave", meta: "Balances and requests", tone: "amber" },
+      { title: "Salary", meta: "Role-gated pay data", tone: "blue" },
+    ],
+    footerActions: ["Approve leave", "Decline leave", "Open payroll", "Upload document"],
+  },
+  {
+    id: "legal",
+    label: "Legal",
+    short: "Legal",
+    icon: "§",
+    eyebrow: "CLIENT SERVICES • RETAINERS • DOCUMENTS",
+    title: "Legal",
+    subtitle: "Client services dashboard, billable month, pipeline by service, needs-attention table, enquiries, retainers, and legal documents.",
+    primaryAction: "Create enquiry",
+    stats: [
+      { title: "Billable month", value: "SAR 74K", meta: "Retainers + matters", tone: "green" },
+      { title: "Needs attention", value: "6", meta: "2 overdue", tone: "red" },
+      { title: "Retainers", value: "12", meta: "3 renewal soon", tone: "amber" },
+      { title: "Enquiries", value: "21", meta: "8 in review", tone: "blue" },
+    ],
+    columns: [
+      { title: "Enquiry", items: [{ title: "New client service", meta: "KYC pending", value: "New", tone: "blue" }] },
+      { title: "Matter", items: [{ title: "Import contract", meta: "Needs clause review", value: "Review", tone: "amber" }] },
+      { title: "Retainer", items: [{ title: "Renewal packet", meta: "PDF in Drive", value: "Ready", tone: "green" }] },
+    ],
+    tableTitle: "Needs-attention table",
+    tableColumns: ["Matter", "Service", "Owner", "Deadline", "Document"],
+    tableRows: [
+      { id: "leg-1", cells: ["LEG-44", "Retainer renewal", "Mariam", "Today", "Draft sent"] },
+      { id: "leg-2", cells: ["LEG-51", "Import contract", "External Counsel", "Tomorrow", "Clause review"] },
+      { id: "leg-3", cells: ["LEG-57", "Client enquiry", "Salim", "This week", "Missing KYC"] },
+    ],
+    sideTitle: "Legal documents",
+    sideItems: [
+      { title: "Retainer", meta: "Renewal and signature packet", tone: "green" },
+      { title: "Matter file", meta: "Clause review and KYC", tone: "amber" },
+      { title: "Client service", meta: "Pipeline by service", tone: "blue" },
+    ],
+    footerActions: ["Open matter", "Prepare retainer", "Attach document", "Resolve attention"],
+  },
+]
+
+const RailIcon = ({ module, active, onClick }: { module: ModulePage; active: boolean; onClick: () => void }) => (
+  <button
+    aria-current={active ? "page" : undefined}
+    className={`grid w-[60px] place-items-center gap-[5px] rounded-[18px] px-0 pb-[7px] pt-[9px] text-center transition ${
+      active ? "bg-[#EDE9E0] text-[#2F2A23]" : "text-[#CFC9B8] hover:text-[#EDE9E0]"
+    }`}
+    onClick={onClick}
+    title={module.label}
+    type="button"
+  >
+    <span className="text-[20px] leading-none">{module.icon}</span>
+    <span className="text-[9.5px] font-semibold leading-tight">{module.short}</span>
+  </button>
 )
 
-const SectionView = ({ section }: { section: ModuleSection }) => (
-  <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
-    <div className="space-y-6">
-      <Card className="overflow-hidden">
-        <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-start">
-          <div className="max-w-3xl text-start">
-            <p className="text-xs font-black uppercase tracking-[0.2em] text-[var(--hanooot-muted)]">{section.eyebrow}</p>
-            <h2 className="mt-2 text-3xl font-black text-[var(--hanooot-ink)]">{section.title}</h2>
-            <p className="mt-3 text-sm leading-7 text-[var(--hanooot-muted)]">{section.summary}</p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {section.actions.slice(0, 3).map((action) => (
-              <Button key={action} type="button" variant={action === section.actions[0] ? "primary" : "secondary"}>
-                {action}
-              </Button>
-            ))}
-          </div>
-        </div>
-      </Card>
+const Badge = ({ children, tone = "neutral" }: { children: React.ReactNode; tone?: Tone }) => (
+  <span className={`inline-flex rounded-full border px-[9px] py-[3px] text-[11px] font-semibold ${toneClass[tone]}`}>{children}</span>
+)
 
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {section.metrics.map((metric) => (
-          <MetricCard key={metric.label} {...metric} />
+const StatCard = ({ item }: { item: CardItem }) => (
+  <div className="rounded-[18px] border border-[#E4E0D6] bg-[#FFFFFF] p-[16px_17px] shadow-[0_8px_24px_rgba(40,36,30,0.06)]">
+    <div className="flex items-start justify-between gap-3">
+      <span className="text-[11px] font-semibold uppercase tracking-[0.09em] text-[#78736A]">{item.title}</span>
+      <Badge tone={item.tone}>{item.tone ?? "neutral"}</Badge>
+    </div>
+    <div className="mt-[10px] text-[27px] font-semibold leading-none tracking-[-0.035em] text-[#3C382F]">{item.value}</div>
+    <div className="mt-[7px] text-[11.5px] font-medium text-[#78736A]">{item.meta}</div>
+  </div>
+)
+
+const KanbanColumn = ({ title, items }: { title: string; items: CardItem[] }) => (
+  <div className="min-h-[220px] rounded-[20px] border border-[#E4E0D6] bg-[#FBFAF7] p-3">
+    <div className="mb-3 flex items-center justify-between">
+      <h3 className="text-[13px] font-semibold text-[#3C382F]">{title}</h3>
+      <span className="rounded-full bg-[#EFEDE6] px-2 py-1 text-[10px] font-semibold text-[#78736A]">{items.length}</span>
+    </div>
+    <div className="space-y-3">
+      {items.map((item) => (
+        <article className="rounded-[18px] border border-[#E4E0D6] bg-white p-3 shadow-[0_8px_20px_rgba(40,36,30,0.04)]" key={`${title}-${item.title}`}>
+          <div className="flex items-start justify-between gap-3">
+            <h4 className="text-[13px] font-semibold text-[#3C382F]">{item.title}</h4>
+            {item.value ? <Badge tone={item.tone}>{item.value}</Badge> : null}
+          </div>
+          <p className="mt-2 text-[12px] leading-5 text-[#78736A]">{item.meta}</p>
+        </article>
+      ))}
+    </div>
+  </div>
+)
+
+const DataTable = ({ columns, rows }: { columns: string[]; rows: Row[] }) => (
+  <div className="overflow-hidden rounded-[18px] border border-[#E4E0D6]">
+    <table className="w-full min-w-[680px] border-collapse text-start text-[12.5px]">
+      <thead className="bg-[#EFEDE6] text-[#78736A]">
+        <tr>{columns.map((column) => <th className="px-4 py-3 text-start font-semibold" key={column}>{column}</th>)}</tr>
+      </thead>
+      <tbody className="divide-y divide-[#E4E0D6] bg-white">
+        {rows.map((row) => (
+          <tr key={row.id}>{row.cells.map((cell, index) => <td className="px-4 py-3 text-[#3C382F]" key={`${row.id}-${index}`}>{cell}</td>)}</tr>
         ))}
-      </section>
+      </tbody>
+    </table>
+  </div>
+)
 
-      <Card>
-        <div className="mb-4 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-          <div>
-            <h3 className="text-xl font-extrabold text-[var(--hanooot-ink)]">{section.tableTitle}</h3>
-            <p className="text-sm text-[var(--hanooot-muted)]">Seeded from the Supabase demo data contract for this module.</p>
+const ModuleView = ({ page }: { page: ModulePage }) => (
+  <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+    <div className="flex h-[56px] flex-none items-center gap-3 border-b border-[#E4E0D6] bg-white px-6">
+      <span className="text-[15.5px] font-semibold tracking-[-0.015em] text-[#3C382F]">{page.title}</span>
+      <span className="text-[12.5px] text-[#78736A]">Sat 19 Sep 2026</span>
+      <div className="flex-1" />
+      <span className="hidden text-[12.5px] text-[#78736A] md:block">Good evening, Salim</span>
+      <button className="rounded-full border border-[#E4E0D6] bg-[#F5F3EE] px-3 py-2 text-[12px] font-semibold text-[#3C382F]" type="button">{page.primaryAction}</button>
+    </div>
+    <div className="min-h-0 flex-1 overflow-auto p-6">
+      <div className="mx-auto flex max-w-[1180px] flex-col gap-4">
+        <section className="rounded-[22px] border border-[#E4E0D6] bg-white p-5 shadow-[0_8px_24px_rgba(40,36,30,0.06)]">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <div className="max-w-3xl">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.09em] text-[#78736A]">{page.eyebrow}</p>
+              <h1 className="mt-2 text-[28px] font-semibold leading-tight tracking-[-0.035em] text-[#3C382F]">{page.title}</h1>
+              <p className="mt-3 text-[13px] leading-6 text-[#78736A]">{page.subtitle}</p>
+            </div>
+            <div className="flex flex-wrap gap-2">{page.footerActions.slice(0, 4).map((action) => <Badge key={action} tone="neutral">{action}</Badge>)}</div>
           </div>
-          <Badge tone="info">Supabase-ready</Badge>
-        </div>
-        <Table columns={section.tableColumns} rows={section.tableRows.map((row) => ({ id: row.id, cells: row.cells }))} />
-      </Card>
+        </section>
 
-      <Card>
-        <div className="mb-4 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-          <div>
-            <h3 className="text-xl font-extrabold text-[var(--hanooot-ink)]">{section.kanbanTitle}</h3>
-            <p className="text-sm text-[var(--hanooot-muted)]">Kanban/list workflow with role-aware action states and threaded record context.</p>
+        <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">{page.stats.map((item) => <StatCard item={item} key={item.title} />)}</section>
+
+        <section className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_330px]">
+          <div className="space-y-4">
+            <div className="grid gap-3 lg:grid-cols-3">{page.columns.map((column) => <KanbanColumn key={column.title} {...column} />)}</div>
+            <div className="rounded-[22px] border border-[#E4E0D6] bg-white p-4 shadow-[0_8px_24px_rgba(40,36,30,0.06)]">
+              <div className="mb-4 flex items-center justify-between gap-3">
+                <div>
+                  <h2 className="text-[16px] font-semibold text-[#3C382F]">{page.tableTitle}</h2>
+                  <p className="text-[12px] text-[#78736A]">Pixel-close table rhythm from the attached prototype: thin warm borders, compact text, and horizontal overflow.</p>
+                </div>
+                <Badge tone="green">Ready</Badge>
+              </div>
+              <DataTable columns={page.tableColumns} rows={page.tableRows} />
+            </div>
           </div>
-          <Badge tone="success">Workflow present</Badge>
-        </div>
-        <KanbanShell
-          columns={section.kanbanColumns.map((column) => ({
-            id: column.id,
-            title: column.title,
-            children: (
-              <div className="space-y-3">
-                {column.cards.map((card) => (
-                  <article className="rounded-2xl border border-[var(--hanooot-border)] bg-[var(--hanooot-card)] p-3" key={card.id}>
-                    <div className="flex items-start justify-between gap-2">
-                      <h4 className="text-sm font-black text-[var(--hanooot-ink)]">{card.title}</h4>
-                      <Badge tone={toneBadge[card.tone]}>{card.value ?? card.owner}</Badge>
-                    </div>
-                    <p className="mt-2 text-xs leading-5 text-[var(--hanooot-muted)]">{card.meta}</p>
-                    <p className="mt-2 text-xs font-bold text-[var(--hanooot-ink)]">Owner: {card.owner}</p>
+
+          <aside className="space-y-4">
+            <div className="rounded-[22px] border border-[#E4E0D6] bg-white p-4 shadow-[0_8px_24px_rgba(40,36,30,0.06)]">
+              <h2 className="text-[16px] font-semibold text-[#3C382F]">{page.sideTitle}</h2>
+              <div className="mt-4 space-y-3">
+                {page.sideItems.map((item) => (
+                  <article className="rounded-[18px] border border-[#E4E0D6] bg-[#FBFAF7] p-3" key={item.title}>
+                    <div className="flex items-start justify-between gap-3"><h3 className="text-[13px] font-semibold text-[#3C382F]">{item.title}</h3><Badge tone={item.tone}>{item.tone ?? "neutral"}</Badge></div>
+                    <p className="mt-2 text-[12px] leading-5 text-[#78736A]">{item.meta}</p>
                   </article>
                 ))}
               </div>
-            ),
-          }))}
-        />
-      </Card>
+            </div>
+            <div className="rounded-[22px] border border-[#E4E0D6] bg-[#2F2A23] p-4 text-[#EDE9E0] shadow-[0_12px_34px_rgba(40,36,30,0.22)]">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.09em] text-[#CFC9B8]">SIGNED IN AS</p>
+              <div className="mt-3 flex items-center gap-3 border-y border-white/10 py-3">
+                <span className="grid h-[34px] w-[34px] place-items-center rounded-full bg-[#EDE9E0] text-[12px] font-semibold text-[#3C382F]">SA</span>
+                <div><p className="text-[13.5px] font-semibold">Salim</p><p className="text-[11.5px] text-[#CFC9B8]">Founder / CEO</p></div>
+              </div>
+              <button className="mt-3 w-full rounded-[16px] bg-[#3C382F] px-3 py-2 text-[12px] font-semibold" type="button">Sign out</button>
+            </div>
+          </aside>
+        </section>
+      </div>
     </div>
-
-    <aside className="space-y-6">
-      <LoginPanel />
-      <Card>
-        <h3 className="text-xl font-extrabold text-[var(--hanooot-ink)]">Mocked integration boundaries</h3>
-        <div className="mt-4 space-y-3">
-          {section.mockedIntegrations.map((integration) => (
-            <p className="rounded-2xl bg-[var(--hanooot-surface)] p-3 text-sm leading-6 text-[var(--hanooot-muted)]" key={integration}>
-              {integration}
-            </p>
-          ))}
-        </div>
-      </Card>
-      <Card>
-        <h3 className="text-xl font-extrabold text-[var(--hanooot-ink)]">Available actions</h3>
-        <div className="mt-4 flex flex-wrap gap-2">
-          {section.actions.map((action) => (
-            <Badge key={action} tone="neutral">
-              {action}
-            </Badge>
-          ))}
-        </div>
-      </Card>
-    </aside>
   </div>
 )
 
 const HanoootWorkspace = () => {
-  const [activeModule, setActiveModule] = useState<HanoootModuleId>("overview")
-  const section = useMemo(() => moduleSections.find((item) => item.id === activeModule) ?? moduleSections[0], [activeModule])
+  const [activeId, setActiveId] = useState<ModuleId>("overview")
+  const [rolesOpen, setRolesOpen] = useState(false)
+  const [bugOpen, setBugOpen] = useState(false)
+  const activePage = useMemo(() => modules.find((module) => module.id === activeId) ?? modules[0], [activeId])
 
   return (
-    <DashboardShell>
-      <div className="space-y-6" id="overview">
-        <Card>
-          <div className="flex flex-col justify-between gap-4 xl:flex-row xl:items-center">
-            <div className="text-start">
-              <p className="text-xs font-black uppercase tracking-[0.2em] text-[var(--hanooot-muted)]">Hanooot ERP • Prototype parity build</p>
-              <h1 className="mt-2 text-3xl font-black text-[var(--hanooot-ink)]">Full ERP surface with Supabase-ready foundation</h1>
-              <p className="mt-3 max-w-4xl text-sm leading-7 text-[var(--hanooot-muted)]">
-                This pass fills the reviewed gaps: all prioritized modules are present, backend migrations/RLS/seed data exist, external integrations are mocked by explicit action boundaries, and smoke coverage verifies the contract.
-              </p>
-            </div>
-            <div className="grid gap-2 text-start text-xs font-bold text-[var(--hanooot-muted)] sm:grid-cols-2 xl:w-[420px]">
-              {featureCoverage.slice(0, 4).map((item) => (
-                <span className="rounded-2xl bg-[var(--hanooot-surface)] p-3" key={item}>{item}</span>
-              ))}
-            </div>
+    <main className="h-screen overflow-hidden bg-[#F5F3EE] font-[Tajawal,ui-sans-serif,system-ui] text-[#3C382F]" dir="ltr">
+      <div className="flex h-full overflow-hidden">
+        <aside className="hidden w-[76px] flex-none flex-col items-center bg-[#2F2A23] py-4 text-[#EDE9E0] shadow-[10px_0_30px_rgba(40,36,30,0.16)] lg:flex">
+          <button className="grid h-11 w-11 place-items-center rounded-[16px] bg-[#EDE9E0] text-[22px] font-bold text-[#2F2A23]" onClick={() => setActiveId("overview")} type="button">H</button>
+          <nav className="mt-7 flex flex-1 flex-col items-center gap-2" aria-label="Hanooot modules">
+            {modules.map((module) => <RailIcon active={activeId === module.id} key={module.id} module={module} onClick={() => setActiveId(module.id)} />)}
+          </nav>
+          <div className="grid gap-3">
+            <button className="relative grid h-10 w-10 place-items-center rounded-[16px] bg-white/10 text-[13px] font-semibold text-[#CFC9B8]" type="button">!<span className="absolute -right-1 -top-1 grid h-4 min-w-4 place-items-center rounded-full bg-[#A8453F] px-1 text-[10px] text-white">4</span></button>
+            <button className="grid h-10 w-10 place-items-center rounded-[16px] bg-white/10 text-[13px] font-semibold text-[#CFC9B8]" onClick={() => setBugOpen(true)} type="button">🐞</button>
+            <button className="grid h-10 w-10 place-items-center rounded-full bg-[#EDE9E0] text-[12px] font-semibold text-[#2F2A23]" onClick={() => setRolesOpen((value) => !value)} type="button">SA</button>
           </div>
-        </Card>
+        </aside>
 
-        <nav aria-label="Module switcher" className="flex gap-2 overflow-x-auto rounded-[22px] border border-[var(--hanooot-border)] bg-[var(--hanooot-card)] p-2">
-          {moduleTabs.map((tab) => (
-            <button
-              aria-pressed={activeModule === tab.id}
-              className={cn(
-                "min-w-max rounded-2xl px-4 py-3 text-sm font-black transition focus:outline-none focus:ring-4 focus:ring-[var(--hanooot-focus-soft)]",
-                activeModule === tab.id
-                  ? "bg-[var(--hanooot-rail)] text-[var(--hanooot-cream)]"
-                  : "text-[var(--hanooot-muted)] hover:bg-[var(--hanooot-active)] hover:text-[var(--hanooot-ink)]",
-              )}
-              key={tab.id}
-              onClick={() => setActiveModule(tab.id)}
-              type="button"
-            >
-              {tab.title}
-            </button>
-          ))}
-        </nav>
-
-        <SectionView section={section} />
-
-        <section className="grid gap-6 xl:grid-cols-2">
-          <Card>
-            <div className="mb-4 flex items-center justify-between gap-3">
-              <h3 className="text-xl font-extrabold text-[var(--hanooot-ink)]">Platform activity feed</h3>
-              <Button type="button" variant="secondary">Mark read</Button>
-            </div>
-            <div className="space-y-3">
-              {activityEvents.map((event) => (
-                <article className="rounded-2xl border border-[var(--hanooot-border)] bg-[var(--hanooot-surface)] p-4" key={event.id}>
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <Badge tone={toneBadge[event.tone]}>{event.department}</Badge>
-                    <span className="text-xs font-bold text-[var(--hanooot-muted)]">{event.timestamp}</span>
-                  </div>
-                  <p className="mt-3 text-sm font-black text-[var(--hanooot-ink)]">{event.title}</p>
-                  <p className="mt-1 text-xs font-bold text-[var(--hanooot-muted)]">{event.actor}</p>
-                </article>
-              ))}
-            </div>
-          </Card>
-
-          <Card>
-            <h3 className="text-xl font-extrabold text-[var(--hanooot-ink)]">Integration status board</h3>
-            <div className="mt-4 space-y-3">
-              {integrationConnections.map((connection) => (
-                <article className="rounded-2xl border border-[var(--hanooot-border)] bg-[var(--hanooot-surface)] p-4" key={connection.id}>
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <h4 className="font-black text-[var(--hanooot-ink)]">{connection.provider}</h4>
-                    <Badge tone={connection.status === "ready" ? "success" : "warning"}>{connection.status}</Badge>
-                  </div>
-                  <p className="mt-2 text-sm leading-6 text-[var(--hanooot-muted)]">{connection.action}</p>
-                  <p className="mt-2 text-xs font-bold text-[var(--hanooot-muted)]">Last run: {connection.lastRun}</p>
-                </article>
-              ))}
-            </div>
-          </Card>
-        </section>
+        <ModuleView page={activePage} />
       </div>
-    </DashboardShell>
+
+      <div className="fixed inset-x-0 bottom-0 z-30 flex border-t border-[#E4E0D6] bg-[#2F2A23] p-2 lg:hidden">
+        {modules.map((module) => <button className={`flex-1 rounded-[14px] px-2 py-2 text-[11px] font-semibold ${activeId === module.id ? "bg-[#EDE9E0] text-[#2F2A23]" : "text-[#CFC9B8]"}`} key={module.id} onClick={() => setActiveId(module.id)} type="button">{module.short}</button>)}
+      </div>
+
+      {rolesOpen ? (
+        <div className="fixed bottom-[18px] left-[82px] z-50 w-[262px] overflow-hidden rounded-[18px] border border-[#E4E0D6] bg-white shadow-[0_12px_34px_rgba(40,36,30,0.22)]">
+          <div className="border-b border-[#E4E0D6] px-[14px] py-[11px] text-[11px] font-semibold uppercase tracking-[0.09em] text-[#78736A]">SIGNED IN AS</div>
+          <div className="flex items-center gap-[11px] border-b border-[#E4E0D6] px-[14px] py-3">
+            <span className="grid h-[34px] w-[34px] place-items-center rounded-full bg-[#EFEDE6] text-[12.5px] font-semibold text-[#3C382F]">SA</span>
+            <div className="min-w-0 flex-1"><p className="text-[13.5px] font-semibold">Salim</p><p className="text-[11.5px] text-[#78736A]">Founder / CEO</p><p className="truncate text-[11.5px] text-[#78736A]">salim@admin.com</p></div>
+          </div>
+          <button className="w-full px-[14px] py-[11px] text-start text-[13px] font-semibold text-[#A2402F] hover:bg-[#FBFAF7]" type="button">Sign out</button>
+        </div>
+      ) : null}
+
+      {bugOpen ? (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-black/35 p-4 backdrop-blur-sm" role="presentation">
+          <section aria-modal="true" className="w-full max-w-[560px] rounded-[22px] border border-[#E4E0D6] bg-white p-5 shadow-[0_12px_34px_rgba(40,36,30,0.22)]" role="dialog">
+            <div className="flex items-start justify-between gap-4"><div><p className="text-[11px] font-semibold uppercase tracking-[0.09em] text-[#78736A]">REPORT A BUG</p><h2 className="mt-1 text-[20px] font-semibold text-[#3C382F]">What went wrong?</h2></div><button className="rounded-full bg-[#EFEDE6] px-3 py-1 text-[16px]" onClick={() => setBugOpen(false)} type="button">×</button></div>
+            <div className="mt-4 grid gap-3"><textarea className="min-h-28 rounded-[18px] border border-[#E4E0D6] bg-[#FBFAF7] p-3 text-[13px] outline-none focus:ring-4 focus:ring-[#E7EEFB]" placeholder="Describe what went wrong" /><textarea className="min-h-20 rounded-[18px] border border-[#E4E0D6] bg-[#FBFAF7] p-3 text-[13px] outline-none focus:ring-4 focus:ring-[#E7EEFB]" placeholder="What did you expect instead?" /></div>
+            <div className="mt-4 flex justify-end gap-2"><button className="rounded-full bg-[#EFEDE6] px-4 py-2 text-[13px] font-semibold" onClick={() => setBugOpen(false)} type="button">Reset demo</button><button className="rounded-full bg-[#3C382F] px-4 py-2 text-[13px] font-semibold text-white" onClick={() => setBugOpen(false)} type="button">Send</button></div>
+          </section>
+        </div>
+      ) : null}
+    </main>
   )
 }
 
