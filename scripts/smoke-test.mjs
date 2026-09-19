@@ -86,51 +86,41 @@ if (fs.readFileSync(path.join(root, "src/app/page.tsx"), "utf8").includes("Exact
   throw new Error("Primary route still uses the iframe prototype shortcut")
 }
 
-const requiredNativeSurfaces = [
-  "Platform activity feed",
-  "Report-a-bug flow",
+const forbiddenChecklist = ["PrototypeSurfaceMatrix", "Prototype-native detail coverage", "Full attached-HTML surfaces"]
+for (const text of forbiddenChecklist) {
+  if (workspace.includes(text)) {
+    throw new Error(`Checklist/matrix implementation still present: ${text}`)
+  }
+}
+
+const requiredRenderedScreens = [
+  'data-native-screen="overview-activity"',
+  'data-native-screen="importing-trade-operations"',
+  'data-native-screen="settings-authority-finance"',
+  'data-native-screen="messages-thread-record-history"',
+  'data-native-screen="drive-upload-linked-documents"',
+  'data-native-screen="hr-people-payroll-documents"',
+  'data-native-screen="legal-client-services-documents"',
   "Target picker",
   "Severity",
-  "Department launcher",
-  "Leads board",
-  "Source",
-  "Campaign",
-  "New lead",
-  "Assignee",
-  "Quick filter",
-  "Call attempts",
-  "Pipeline/deals board",
   "New deal modal",
-  "Advance",
-  "Lost",
-  "Drop to won",
-  "Sourcing workflow",
+  "Drop-to-won creates order",
   "Customer CN search",
-  "Supplier photos",
-  "Customer photos",
-  "RMB price",
-  "USD price",
-  "QR workflow",
   "Generate quote PDF",
   "Facebook audience CSV",
   "WhatsApp bulk action",
   "Authority matrix",
   "Sales tax rate",
-  "Exchange rates",
   "People search",
-  "Record panel",
-  "Upload modal",
+  "Record history panel",
   "Add-file modal",
   "August 2026 payroll",
-  "Approve leave",
-  "Decline leave",
-  "Client services",
-  "Needs-attention table",
+  "Approve / Decline",
   "Legal document generator",
 ]
-for (const text of requiredNativeSurfaces) {
+for (const text of requiredRenderedScreens) {
   if (!workspace.includes(text)) {
-    throw new Error(`Native workspace missing prototype surface: ${text}`)
+    throw new Error(`Native rendered screen missing structure/content: ${text}`)
   }
 }
 

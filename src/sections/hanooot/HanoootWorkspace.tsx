@@ -35,50 +35,6 @@ const toneClass: Record<Tone, string> = {
   neutral: "bg-[#EFEDE6] text-[#78736A] border-[#E4E0D6]",
 }
 
-type PrototypeSurface = {
-  title: string
-  label: string
-  description: string
-  controls: string[]
-  tone?: Tone
-}
-
-const prototypeSurfaces: Record<ModuleId, PrototypeSurface[]> = {
-  overview: [
-    { title: "Platform activity feed", label: "PLATFORM ACTIVITY", description: "Rows keep department chip, timestamp, Mark read state, alerts count, and record handoff exactly like the bundled prototype.", controls: ["Mark read", "Alerts", "Department chip", "Timestamp"], tone: "blue" },
-    { title: "Report-a-bug flow", label: "BUG REPORT MODAL", description: "Centered overlay with target picker, severity choices, What went wrong, What you expected instead, Send, and Reset demo actions.", controls: ["Target picker", "Severity", "What went wrong", "What you expected instead", "Send", "Reset demo"], tone: "red" },
-    { title: "Department launcher", label: "BRANCHES", description: "Department cards and Open → actions use Legal blue, HR green, Importing amber, Drive/Settings neutral tones.", controls: ["Legal", "HR", "Importing", "Drive", "Settings", "Open →"], tone: "green" },
-  ],
-  importing: [
-    { title: "Leads board", label: "LEADS", description: "Source, Campaign, New lead, assignee filter, quick filter, call attempts, and drag/drop columns are present as native controls.", controls: ["Source", "Campaign", "New lead", "Assignee", "Quick filter", "Call attempts", "Drag/drop columns"], tone: "blue" },
-    { title: "Pipeline/deals board", label: "PIPELINE", description: "Kanban columns include New deal modal, Advance/Lost actions, and drop-to-won order creation behavior.", controls: ["New deal modal", "Advance", "Lost", "Drop to won", "Create order"], tone: "green" },
-    { title: "Sourcing workflow", label: "SOURCING", description: "Customer CN search, item cards, supplier link, supplier/customer photos, RMB/USD price fields, comments/thread, and QR workflow.", controls: ["Customer CN search", "Supplier link", "Supplier photos", "Customer photos", "RMB price", "USD price", "Comments/thread", "QR workflow"], tone: "amber" },
-    { title: "Orders, products, contacts", label: "ORDER FLOW", description: "Order stages, products on deal, shipment actions, quote items, priced indicators, quote PDF, Facebook audience CSV, WhatsApp bulk action.", controls: ["Order stages", "Products on deal", "Shipment actions", "Quote items", "Priced indicators", "Generate quote PDF", "Facebook audience CSV", "WhatsApp bulk action"], tone: "purple" },
-    { title: "Integration settings", label: "MOCKED INTEGRATIONS", description: "Campaigns/ad forms, lead form questions, pipeline/order stages, automation rules, currency, Facebook/Zoho status remain mocked for v1.", controls: ["Ad forms", "Lead form questions", "Automation rules", "Currency", "Facebook status", "Zoho status"], tone: "neutral" },
-  ],
-  settings: [
-    { title: "Organisation", label: "PLATFORM WIDE", description: "Organisation cards cover active departments, user creation, access grants, and notification rules.", controls: ["Active departments", "Create user", "Access grants", "Notification rules"], tone: "green" },
-    { title: "Authority matrix", label: "READ ONLY", description: "Department/subdepartment permission levels, locked states, and super-admin explanatory copy match the prototype intent.", controls: ["Authority matrix", "Department level", "Subdepartment level", "Locked state", "Super-admin only"], tone: "amber" },
-    { title: "Finance settings", label: "BASE CURRENCY", description: "Base currency, sales tax rate, exchange rates, and read-only finance controls are grouped like the source design.", controls: ["Base currency", "Sales tax rate", "Exchange rates", "Read only"], tone: "blue" },
-  ],
-  messages: [
-    { title: "Groups and people", label: "MESSAGES", description: "New group, people search, thread list, reply composer, and empty states are available as native surfaces.", controls: ["New group", "People search", "Thread", "Reply", "Empty state"], tone: "blue" },
-    { title: "Mentions and history", label: "ACTIVITY", description: "Mentions, activity handoff, linked record/history panel, and timeline rows mirror the prototype workflow.", controls: ["Mentions", "Activity handoff", "Record panel", "History panel"], tone: "amber" },
-  ],
-  drive: [
-    { title: "Upload modal", label: "DRIVE", description: "Upload CTA, add-file modal state, linked document tables, and storage-ready abstractions are represented in native UI.", controls: ["Upload", "Add-file modal", "Name", "Linked To", "Owner", "Size"], tone: "green" },
-    { title: "Document areas", label: "LINKED FILES", description: "Legal, HR, and Importing document areas show linked files and bucket-ready storage statuses.", controls: ["Legal documents", "HR documents", "Importing documents", "Storage bucket"], tone: "blue" },
-  ],
-  hr: [
-    { title: "People and leave", label: "HR", description: "People/headcount, employee table, leave approve/decline, contact, annual leave, and salary panels are explicit surfaces.", controls: ["Headcount", "Employee table", "Approve leave", "Decline leave", "Contact", "Annual leave", "Salary panel"], tone: "green" },
-    { title: "Payroll and documents", label: "AUGUST 2026 PAYROLL", description: "August 2026 payroll run, employee documents, role-gated salary copy, and Drive links match the required HR flow.", controls: ["August 2026 payroll", "Employee documents", "Role-gated salary", "Drive link"], tone: "blue" },
-  ],
-  legal: [
-    { title: "Client services", label: "LEGAL", description: "Client services dashboard, billable month, pipeline by service, needs-attention table, enquiries, and retainers.", controls: ["Client services", "Billable month", "Pipeline by service", "Needs-attention table", "Enquiries", "Retainers"], tone: "purple" },
-    { title: "Legal documents", label: "DOCUMENTS", description: "Matter files, retainers, legal document generator surface, owner review states, and Drive links.", controls: ["Matter files", "Retainers", "Legal document generator", "Owner review", "Drive link"], tone: "blue" },
-  ],
-}
-
 const modules: ModulePage[] = [
   {
     id: "overview",
@@ -392,37 +348,76 @@ const DataTable = ({ columns, rows }: { columns: string[]; rows: Row[] }) => (
   </div>
 )
 
-const PrototypeSurfaceMatrix = ({ moduleId }: { moduleId: ModuleId }) => (
-  <section className="rounded-[22px] border border-[#E4E0D6] bg-white p-4 shadow-[0_8px_24px_rgba(40,36,30,0.06)]">
-    <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+const DetailCard = ({ title, kicker, children, tone = "neutral" }: { title: string; kicker: string; children: React.ReactNode; tone?: Tone }) => (
+  <article className="rounded-[20px] border border-[#E4E0D6] bg-white p-4 shadow-[0_8px_20px_rgba(40,36,30,0.04)]">
+    <div className="mb-3 flex items-start justify-between gap-3">
       <div>
-        <p className="text-[11px] font-semibold uppercase tracking-[0.09em] text-[#78736A]">Prototype-native detail coverage</p>
-        <h2 className="text-[16px] font-semibold text-[#3C382F]">Full attached-HTML surfaces</h2>
+        <p className="text-[10.5px] font-semibold uppercase tracking-[0.09em] text-[#78736A]">{kicker}</p>
+        <h3 className="mt-1 text-[14px] font-semibold text-[#3C382F]">{title}</h3>
       </div>
-      <Badge tone="green">Native React</Badge>
+      <Badge tone={tone}>{kicker}</Badge>
     </div>
-    <div className="grid gap-3 lg:grid-cols-2">
-      {prototypeSurfaces[moduleId].map((surface) => (
-        <article className="rounded-[20px] border border-[#E4E0D6] bg-[#FBFAF7] p-4" key={surface.title}>
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <Badge tone={surface.tone}>{surface.label}</Badge>
-              <h3 className="mt-3 text-[14px] font-semibold text-[#3C382F]">{surface.title}</h3>
-            </div>
-          </div>
-          <p className="mt-2 text-[12.5px] leading-5 text-[#78736A]">{surface.description}</p>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {surface.controls.map((control) => (
-              <span className="rounded-full border border-[#E4E0D6] bg-white px-2.5 py-1 text-[11px] font-semibold text-[#3C382F]" key={control}>
-                {control}
-              </span>
+    {children}
+  </article>
+)
+
+const MiniField = ({ label, value }: { label: string; value: string }) => (
+  <label className="grid gap-1 text-[11.5px] font-semibold text-[#78736A]">
+    {label}
+    <span className="rounded-[14px] border border-[#E4E0D6] bg-[#FBFAF7] px-3 py-2 text-[12px] font-medium text-[#3C382F]">{value}</span>
+  </label>
+)
+
+const MiniButton = ({ children, tone = "neutral" }: { children: React.ReactNode; tone?: Tone }) => (
+  <button className={`rounded-full border px-3 py-1.5 text-[11.5px] font-semibold ${toneClass[tone]}`} type="button">
+    {children}
+  </button>
+)
+
+const RealModuleScreens = ({ moduleId }: { moduleId: ModuleId }) => {
+  if (moduleId === "overview") {
+    return (
+      <section data-native-screen="overview-activity" className="grid gap-4 xl:grid-cols-[1fr_360px]">
+        <DetailCard kicker="PLATFORM ACTIVITY" title="Activity drawer with feed rows" tone="blue">
+          <div className="mb-3 flex items-center justify-between"><span className="text-[12px] text-[#78736A]">Department events, alerts, build label, timestamps</span><MiniButton tone="blue">Mark read</MiniButton></div>
+          <div className="space-y-2">
+            {["Facebook lead synced · Importing · 12 min ago", "Bill of lading linked · Drive · 1 hr ago", "Retainer renewal flagged · Legal · today", "Leave approval requested · HR · today"].map((row) => (
+              <div className="flex items-center justify-between rounded-[16px] border border-[#E4E0D6] bg-[#FBFAF7] px-3 py-2" key={row}><span className="text-[12.5px] text-[#3C382F]">{row}</span><Badge tone="neutral">Open →</Badge></div>
             ))}
           </div>
-        </article>
-      ))}
-    </div>
-  </section>
-)
+        </DetailCard>
+        <DetailCard kicker="REPORT A BUG" title="Bug report modal fields" tone="red">
+          <div className="grid gap-2"><MiniField label="Target picker" value="Current module: Overview" /><MiniField label="Severity" value="Low · Medium · High · Critical" /><MiniField label="What went wrong" value="Textarea with visible focus" /><MiniField label="Expected instead" value="Textarea + Send + Reset demo" /></div>
+        </DetailCard>
+      </section>
+    )
+  }
+  if (moduleId === "importing") {
+    return (
+      <section data-native-screen="importing-trade-operations" className="space-y-4">
+        <div className="grid gap-4 xl:grid-cols-3">
+          <DetailCard kicker="LEADS" title="Lead intake board" tone="blue"><div className="grid grid-cols-2 gap-2"><MiniField label="Source" value="Facebook Lead Ads" /><MiniField label="Campaign" value="Ramadan imports" /><MiniField label="Assignee" value="Abeer" /><MiniField label="Quick filter" value="Uncalled / Hot / Form" /></div><div className="mt-3 flex flex-wrap gap-2"><MiniButton tone="blue">New lead</MiniButton><MiniButton tone="amber">Call attempt</MiniButton><MiniButton>Drag/drop column</MiniButton></div></DetailCard>
+          <DetailCard kicker="PIPELINE" title="Deals kanban + order conversion" tone="green"><div className="grid gap-2">{["New deal modal", "Advance", "Lost", "Drop-to-won creates order"].map(x=><div className="rounded-[14px] bg-[#FBFAF7] px-3 py-2 text-[12px]" key={x}>{x}</div>)}</div></DetailCard>
+          <DetailCard kicker="SOURCING" title="CN search and supplier media" tone="amber"><div className="grid grid-cols-2 gap-2"><MiniField label="Customer CN search" value="CN-88021" /><MiniField label="Supplier link" value="Yiwu Source" /><MiniField label="RMB price" value="¥18,400" /><MiniField label="USD price" value="$2,540" /></div><div className="mt-3 flex flex-wrap gap-2"><MiniButton tone="amber">Supplier photos</MiniButton><MiniButton tone="blue">Customer photos</MiniButton><MiniButton>QR workflow</MiniButton></div></DetailCard>
+        </div>
+        <DetailCard kicker="ORDERS PRODUCTS CONTACTS" title="Shipment, quote and outbound actions" tone="purple"><div className="grid gap-2 md:grid-cols-4">{["Order stages", "Products on deal", "Shipment actions", "Quote items", "Priced indicators", "Generate quote PDF", "Facebook audience CSV", "WhatsApp bulk action"].map(x=><span className="rounded-[14px] border border-[#E4E0D6] bg-[#FBFAF7] px-3 py-2 text-[12px]" key={x}>{x}</span>)}</div></DetailCard>
+      </section>
+    )
+  }
+  if (moduleId === "settings") {
+    return <section data-native-screen="settings-authority-finance" className="grid gap-4 xl:grid-cols-3"><DetailCard kicker="PLATFORM WIDE" title="Organisation and users" tone="green"><div className="grid gap-2"><MiniField label="Active departments" value="Overview, Importing, Drive, HR, Legal" /><MiniField label="User creation" value="Name · Email · Role · Department" /><MiniButton tone="green">Grant access</MiniButton></div></DetailCard><DetailCard kicker="READ ONLY" title="Authority matrix" tone="amber"><DataTable columns={["Department", "Subdepartment", "Level", "State"]} rows={[{id:"a",cells:["Importing","Orders","Write","Open"]},{id:"b",cells:["Finance","Tax","Super admin","Locked"]},{id:"c",cells:["Legal","Retainers","Read","Read only"]}]} /></DetailCard><DetailCard kicker="FINANCE" title="Currency, tax and notifications" tone="blue"><div className="grid gap-2"><MiniField label="Base currency" value="SAR" /><MiniField label="Sales tax rate" value="15%" /><MiniField label="Exchange rates" value="RMB · USD · AED" /><MiniField label="Notification rules" value="Activity · Mentions · Orders" /></div></DetailCard></section>
+  }
+  if (moduleId === "messages") {
+    return <section data-native-screen="messages-thread-record-history" className="grid gap-4 xl:grid-cols-[320px_1fr_300px]"><DetailCard kicker="PEOPLE" title="Groups and search" tone="blue"><MiniButton tone="blue">New group</MiniButton><div className="mt-3 grid gap-2"><MiniField label="People search" value="Abeer, Mariam, Lina" /><MiniField label="Empty state" value="Select a thread" /></div></DetailCard><DetailCard kicker="THREAD" title="Replies and mentions" tone="amber"><div className="space-y-2">{["@Abeer supplier photos are ready", "Reply composer with linked record", "Mention activity handoff"].map(x=><div className="rounded-[16px] bg-[#FBFAF7] px-3 py-2 text-[12.5px]" key={x}>{x}</div>)}</div></DetailCard><DetailCard kicker="HISTORY" title="Record history panel" tone="green"><div className="grid gap-2"><MiniField label="Linked To" value="Sourcing SRC-18" /><MiniField label="Record panel" value="Deal · File · Matter" /><MiniField label="Timeline" value="Comments + mentions" /></div></DetailCard></section>
+  }
+  if (moduleId === "drive") {
+    return <section data-native-screen="drive-upload-linked-documents" className="grid gap-4 xl:grid-cols-[360px_1fr]"><DetailCard kicker="UPLOAD" title="Add-file modal" tone="green"><div className="grid gap-2"><MiniField label="File picker" value="Choose file" /><MiniField label="Linked To" value="Order / Employee / Matter" /><MiniField label="Owner" value="Abeer" /><MiniButton tone="green">Upload</MiniButton></div></DetailCard><DetailCard kicker="LINKED FILES" title="Document areas" tone="blue"><DataTable columns={["Area", "Name", "Linked To", "Status"]} rows={[{id:"d1",cells:["Importing","quote-po-309.pdf","Order PO-309","Ready"]},{id:"d2",cells:["HR","employee-contract.docx","EMP-07","Missing signature"]},{id:"d3",cells:["Legal","retainer.pdf","LEG-44","Owner review"]}]} /></DetailCard></section>
+  }
+  if (moduleId === "hr") {
+    return <section data-native-screen="hr-people-payroll-documents" className="grid gap-4 xl:grid-cols-3"><DetailCard kicker="PEOPLE" title="Employee panels" tone="green"><div className="grid gap-2"><MiniField label="Headcount" value="18 employees" /><MiniField label="Contact" value="Phone · Emergency" /><MiniField label="Annual leave" value="Approve / Decline" /></div></DetailCard><DetailCard kicker="AUGUST 2026 PAYROLL" title="Payroll run" tone="blue"><div className="grid gap-2"><MiniField label="Payroll status" value="Draft locked" /><MiniField label="Salary panel" value="Role-gated" /><MiniButton tone="blue">Open payroll</MiniButton></div></DetailCard><DetailCard kicker="DOCUMENTS" title="Employee documents" tone="amber"><DataTable columns={["Employee", "Document", "State"]} rows={[{id:"h1",cells:["Hassan","ID","Uploaded"]},{id:"h2",cells:["Abeer","Contract","Missing"]},{id:"h3",cells:["Lina","Payroll form","Ready"]}]} /></DetailCard></section>
+  }
+  return <section data-native-screen="legal-client-services-documents" className="grid gap-4 xl:grid-cols-3"><DetailCard kicker="CLIENT SERVICES" title="Legal dashboard" tone="purple"><div className="grid gap-2"><MiniField label="Billable month" value="SAR 74K" /><MiniField label="Pipeline by service" value="Retainers · Matters · Enquiries" /><MiniButton tone="purple">Create enquiry</MiniButton></div></DetailCard><DetailCard kicker="NEEDS ATTENTION" title="Enquiries and retainers" tone="red"><DataTable columns={["Matter", "Service", "Owner", "State"]} rows={[{id:"l1",cells:["LEG-44","Retainer","Mariam","Renewal"]},{id:"l2",cells:["LEG-51","Import contract","Counsel","Clause review"]},{id:"l3",cells:["LEG-57","Client enquiry","Salim","Missing KYC"]}]} /></DetailCard><DetailCard kicker="DOCUMENTS" title="Legal document generator" tone="blue"><div className="grid gap-2"><MiniField label="Matter files" value="Drive linked" /><MiniField label="Owner review" value="Required" /><MiniField label="Retainer packet" value="Generated draft" /></div></DetailCard></section>
+}
 
 const ModuleView = ({ page }: { page: ModulePage }) => (
   <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
@@ -461,7 +456,7 @@ const ModuleView = ({ page }: { page: ModulePage }) => (
               </div>
               <DataTable columns={page.tableColumns} rows={page.tableRows} />
             </div>
-            <PrototypeSurfaceMatrix moduleId={page.id} />
+            <RealModuleScreens moduleId={page.id} />
           </div>
 
           <aside className="space-y-4">
