@@ -17,3 +17,7 @@
 - RTL/Arabic: `html` is configured for `dir="rtl"`, logical spacing classes are used, and Tajawal is loaded.
 - Accessibility: buttons have labels, modal uses `role="dialog"`, focus states remain visible, tables include header scopes.
 - Backend: migration creates all accepted entities and enables RLS on application tables.
+
+## Same-to-same prototype pass
+
+The primary `/` route now renders `public/hanooot-standalone.html` inside a full-viewport iframe. This preserves the complete attached standalone prototype as the user requested, including its bundled layout, module UI, interactions, typography, rail/header proportions, activity/bug/role surfaces, and all embedded module resources. The React/Supabase foundation remains in the repository for the production rebuild, but the reviewable UI is the exact provided HTML asset.

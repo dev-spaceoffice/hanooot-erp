@@ -3,6 +3,8 @@ import path from "node:path"
 
 const root = process.cwd()
 const requiredFiles = [
+  "public/hanooot-standalone.html",
+  "src/sections/hanooot/ExactPrototypeFrame.tsx",
   "src/sections/hanooot/HanoootWorkspace.tsx",
   "src/data/hanooot.ts",
   "src/types/hanooot.ts",
@@ -72,6 +74,13 @@ if (!migration.includes("enable row level security")) {
 for (const table of requiredTables) {
   if (!migration.includes(`'${table}'`)) {
     throw new Error(`RLS loop missing table: ${table}`)
+  }
+}
+
+const prototypeHtml = fs.readFileSync(path.join(root, "public/hanooot-standalone.html"), "utf8")
+for (const text of ["SIGNED IN AS", "Report a bug", "Overview", "Importing", "Settings", "Messages", "Drive", "HR", "Legal"]) {
+  if (!prototypeHtml.includes(text)) {
+    throw new Error(`Exact prototype asset missing UI text: ${text}`)
   }
 }
 

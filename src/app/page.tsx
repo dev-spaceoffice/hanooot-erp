@@ -1,5 +1,5 @@
-import HanoootWorkspace from "@/sections/hanooot/HanoootWorkspace"
+import ExactPrototypeFrame from "@/sections/hanooot/ExactPrototypeFrame"
 
-const Page = () => <HanoootWorkspace />
+const Page = () => <ExactPrototypeFrame />
 
 export default Page
