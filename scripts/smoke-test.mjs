@@ -3,8 +3,11 @@ import path from "node:path"
 
 const root = process.cwd()
 const requiredFiles = [
-  "src/app/_hanooot/HanoootScreen.tsx",
-  "src/app/_hanooot/hanooot-data.ts",
+  "src/app/_hanooot/HanoootAppShell.tsx",
+  "src/app/_hanooot/Badge.tsx",
+  "src/app/_hanooot/BoardColumn.tsx",
+  "src/app/_hanooot/DataTable.tsx",
+  "src/app/_hanooot/StatCard.tsx",
   "src/data/hanooot.ts",
   "src/types/hanooot.ts",
   "supabase/migrations/20260919201500_hanooot_core.sql",
@@ -57,6 +60,12 @@ const requiredTables = [
 const requiredModules = ["overview", "settings", "importing", "messages", "drive", "hr", "legal"]
 
 
+
+const sharedScreenPath = path.join(root, "src/app/_hanooot/HanoootScreen.tsx")
+if (fs.existsSync(sharedScreenPath)) {
+  throw new Error("Do not keep one shared HanoootScreen renderer; implement route-owned page compositions")
+}
+
 const renamedPagePath = path.join(root, "src/components/hanooot/HanoootPage.tsx")
 if (fs.existsSync(renamedPagePath)) {
   throw new Error("Do not keep a renamed HanoootPage component; implement Hanooot route code under src/app")
@@ -68,7 +77,7 @@ if (fs.existsSync(removedWorkspacePath)) {
 }
 const appSources = fs.readdirSync(path.join(root, "src/app"), { recursive: true, withFileTypes: true })
   .filter((entry) => entry.isFile() && entry.name.endsWith(".tsx"))
-for (const entry of appSources) {
+for (const entry of appSources.filter((entry) => entry.name === "page.tsx")) {
   const file = path.join(entry.parentPath, entry.name)
   const source = fs.readFileSync(file, "utf8")
   if (source.includes("HanoootWorkspace")) {
@@ -77,6 +86,22 @@ for (const entry of appSources) {
   if (source.includes("HanoootPage")) {
     throw new Error(`App route still imports/uses renamed HanoootPage: ${path.relative(root, file)}`)
   }
+}
+
+
+const wrapperOnlyRoutes = []
+for (const entry of appSources.filter((entry) => entry.name === "page.tsx")) {
+  const file = path.join(entry.parentPath, entry.name)
+  const source = fs.readFileSync(file, "utf8")
+  if (source.includes("<HanoootScreen") || source.includes("@/app/_hanooot/HanoootScreen")) {
+    wrapperOnlyRoutes.push(path.relative(root, file))
+  }
+  if (!source.includes("const stats") && !source.includes("_not-found")) {
+    wrapperOnlyRoutes.push(`${path.relative(root, file)} missing route-owned composition data`)
+  }
+}
+if (wrapperOnlyRoutes.length > 0) {
+  throw new Error(`Wrapper-only Hanooot routes are not allowed: ${wrapperOnlyRoutes.join(", ")}`)
 }
 
 const missingFiles = requiredFiles.filter((file) => !fs.existsSync(path.join(root, file)))
@@ -100,7 +125,7 @@ for (const table of requiredTables) {
   }
 }
 
-const workspace = fs.readFileSync(path.join(root, "src/app/_hanooot/HanoootScreen.tsx"), "utf8") + "\n" + fs.readFileSync(path.join(root, "src/app/_hanooot/hanooot-data.ts"), "utf8")
+const workspace = fs.readdirSync(path.join(root, "src/app"), { recursive: true, withFileTypes: true }).filter((entry) => entry.isFile() && entry.name.endsWith(".tsx")).map((entry) => fs.readFileSync(path.join(entry.parentPath, entry.name), "utf8")).join("\n")
 for (const text of ["Overview", "Importing", "Settings", "Messages", "Drive", "HR", "Legal", "SIGNED IN AS", "REPORT A BUG"]) {
   if (!workspace.includes(text)) {
     throw new Error(`Native workspace missing UI text: ${text}`)
@@ -118,8 +143,8 @@ for (const text of forbiddenChecklist) {
 }
 
 const requiredRenderedScreens = [
-  'data-native-screen={`${activeModule.id}-native-screen`}',
-  "Reference details implemented in code",
+  'data-hanooot-route=',
+  "const stats =",
   "Importing Service",
   "Amman — Head office",
   "Aqaba — Port office",
@@ -180,19 +205,21 @@ for (const file of requiredAppRoutes) {
 }
 
 
-const workspaceSource = fs.readFileSync(path.join(root, "src/app/_hanooot/HanoootScreen.tsx"), "utf8") + "\n" + fs.readFileSync(path.join(root, "src/app/_hanooot/hanooot-data.ts"), "utf8")
+const workspaceSource = workspace
 if (workspaceSource.includes("hanooot-standalone")) {
   throw new Error("Native app source must not reference the standalone HTML asset")
 }
 
-const data = fs.readFileSync(path.join(root, "src/data/hanooot.ts"), "utf8")
-const missingModules = requiredModules.filter((moduleId) => !data.includes(`id: "${moduleId}"`))
-if (missingModules.length > 0) {
-  throw new Error(`Missing module fixtures: ${missingModules.join(", ")}`)
+for (const moduleId of requiredModules) {
+  const pagePath = moduleId === "overview" ? "src/app/overview/page.tsx" : `src/app/${moduleId}/page.tsx`
+  const routeSource = fs.readFileSync(path.join(root, pagePath), "utf8")
+  if (!routeSource.includes(`active="${moduleId}"`)) {
+    throw new Error(`Route-specific page missing module marker: ${pagePath}`)
+  }
 }
 
-for (const integration of ["Facebook", "Zoho", "WhatsApp", "Quote PDF"]) {
-  if (!data.includes(integration)) {
+for (const integration of ["Facebook", "Zoho", "WhatsApp", "Generate quote PDF"]) {
+  if (!workspace.includes(integration)) {
     throw new Error(`Missing mocked integration surface: ${integration}`)
   }
 }

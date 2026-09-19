@@ -2,7 +2,7 @@
 
 ## Current implementation
 
-The Hanooot ERP frontend is implemented as real Next.js App Router pages under `src/app/`. The previous `HanoootWorkspace.tsx` file and the renamed `HanoootPage.tsx` component are deleted. Shared route primitives and data live under `src/app/_hanooot/`, so the product UI remains app-folder owned while avoiding direct storage/rendering of the attached standalone HTML file.
+The Hanooot ERP frontend is implemented as real Next.js App Router pages under `src/app/`. The previous `HanoootWorkspace.tsx` file and the renamed `HanoootPage.tsx` component are deleted. Each `src/app/.../page.tsx` now owns its own Hanooot composition data and JSX. Only small shared primitives such as shell, badges, cards, board columns, and tables live under `src/app/_hanooot/`, so there is no central Hanooot screen renderer and no direct storage/rendering of the attached standalone HTML file.
 
 The attached HTML was decoded outside the repository and used as the visual/data reference. It exposed the shell, root overview surface, and module bundles for Importing, Settings, Messages, Drive, HR, and Legal; those labels, flows, colors, tables, cards, and controls are represented in typed route data and native JSX.
 
@@ -30,4 +30,4 @@ The attached HTML was decoded outside the repository and used as the visual/data
 
 ## Validation
 
-`npm test` verifies the native route set, rejects the old standalone HTML asset, rejects both `HanoootWorkspace.tsx` and `HanoootPage.tsx`, rejects iframe/checklist approaches, checks concrete rendered-screen markers, and confirms Supabase schema coverage. `npm run lint` and `npm run build` are required before review handoff.
+`npm test` verifies the native route set, rejects the old standalone HTML asset, rejects `HanoootWorkspace.tsx`, `HanoootPage.tsx`, and a shared `HanoootScreen.tsx` renderer, rejects wrapper-only routes, rejects iframe/checklist approaches, checks concrete rendered-screen markers, and confirms Supabase schema coverage. `npm run lint` and `npm run build` are required before review handoff.
