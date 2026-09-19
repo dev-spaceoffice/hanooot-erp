@@ -1,5 +1,5 @@
-import HanoootPage from "@/components/hanooot/HanoootPage"
+import HanoootScreen from "@/app/_hanooot/HanoootScreen"
 
-const Page = () => <HanoootPage detailSurface="Drive · Files" moduleId="drive" />
+const Page = () => <HanoootScreen moduleId="drive" detailSurface="Drive · Files" />
 
 export default Page

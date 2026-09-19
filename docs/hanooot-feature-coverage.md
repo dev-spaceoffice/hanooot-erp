@@ -2,7 +2,9 @@
 
 ## Current implementation
 
-The Hanooot ERP frontend is now implemented as native Next.js App Router pages under `src/app/`, supported by reusable Hanooot UI component code under `src/components/hanooot/`. The old `HanoootWorkspace.tsx` file has been deleted. The bundled standalone HTML reference file is not stored in the repo and is not imported, iframe-rendered, or used by runtime code.
+The Hanooot ERP frontend is implemented as real Next.js App Router pages under `src/app/`. The previous `HanoootWorkspace.tsx` file and the renamed `HanoootPage.tsx` component are deleted. Shared route primitives and data live under `src/app/_hanooot/`, so the product UI remains app-folder owned while avoiding direct storage/rendering of the attached standalone HTML file.
+
+The attached HTML was decoded outside the repository and used as the visual/data reference. It exposed the shell, root overview surface, and module bundles for Importing, Settings, Messages, Drive, HR, and Legal; those labels, flows, colors, tables, cards, and controls are represented in typed route data and native JSX.
 
 ## App routes
 
@@ -17,10 +19,10 @@ The Hanooot ERP frontend is now implemented as native Next.js App Router pages u
 
 ## Native UI coverage
 
-- Warm Hanooot palette, 76px dark left rail, top module header, role/profile surface, mobile bottom navigation, and responsive card/table layouts.
-- Overview activity feed, alerts, bug-report fields, department launcher, and branch table.
-- Importing lead intake, campaign/source filters, call attempts, pipeline/deal actions, sourcing CN workflow, supplier/customer photos, RMB/USD pricing, order/shipment/quote/product/contact/outbound action surfaces.
-- Settings organisation, users, access grants, authority matrix, finance/tax/currency/exchange-rate, and notification rule surfaces.
+- Warm Hanooot palette, 76px dark rail, top module header, role/profile surface, mobile bottom navigation, responsive cards/tables/kanban boards.
+- Overview activity feed, alerts, report-bug fields, department shortcuts, and branch table.
+- Importing lead intake, campaign/source filters, call attempts, pipeline/deal actions, sourcing CN workflow, supplier/customer photos, RMB/USD pricing, order/shipment/quote/product/contact/outbound actions.
+- Settings organisation, users, access grants, authority matrix, finance/tax/currency/exchange-rate, notification rule surfaces.
 - Messages groups, people search, threads, replies, mentions, activity handoff, and record-history panel.
 - Drive upload/add-file fields, storage table, linked document areas, and module-specific document links.
 - HR people/headcount, leave approval, August 2026 payroll, employee documents, contact, annual leave, and salary panels.
@@ -28,4 +30,4 @@ The Hanooot ERP frontend is now implemented as native Next.js App Router pages u
 
 ## Validation
 
-`npm test` verifies the native route set, rejects the old standalone HTML asset, rejects the deleted `HanoootWorkspace.tsx` path/imports, rejects iframe/checklist approaches, checks concrete rendered-screen markers, and confirms Supabase schema coverage. `npm run lint` and `npm run build` are required before review handoff.
+`npm test` verifies the native route set, rejects the old standalone HTML asset, rejects both `HanoootWorkspace.tsx` and `HanoootPage.tsx`, rejects iframe/checklist approaches, checks concrete rendered-screen markers, and confirms Supabase schema coverage. `npm run lint` and `npm run build` are required before review handoff.

@@ -3,7 +3,8 @@ import path from "node:path"
 
 const root = process.cwd()
 const requiredFiles = [
-  "src/components/hanooot/HanoootPage.tsx",
+  "src/app/_hanooot/HanoootScreen.tsx",
+  "src/app/_hanooot/hanooot-data.ts",
   "src/data/hanooot.ts",
   "src/types/hanooot.ts",
   "supabase/migrations/20260919201500_hanooot_core.sql",
@@ -55,9 +56,15 @@ const requiredTables = [
 
 const requiredModules = ["overview", "settings", "importing", "messages", "drive", "hr", "legal"]
 
+
+const renamedPagePath = path.join(root, "src/components/hanooot/HanoootPage.tsx")
+if (fs.existsSync(renamedPagePath)) {
+  throw new Error("Do not keep a renamed HanoootPage component; implement Hanooot route code under src/app")
+}
+
 const removedWorkspacePath = path.join(root, "src/sections/hanooot/HanoootWorkspace.tsx")
 if (fs.existsSync(removedWorkspacePath)) {
-  throw new Error("HanoootWorkspace.tsx must be deleted; use app pages plus HanoootPage component code")
+  throw new Error("HanoootWorkspace.tsx must be deleted; use app-folder route code and shared primitives")
 }
 const appSources = fs.readdirSync(path.join(root, "src/app"), { recursive: true, withFileTypes: true })
   .filter((entry) => entry.isFile() && entry.name.endsWith(".tsx"))
@@ -66,6 +73,9 @@ for (const entry of appSources) {
   const source = fs.readFileSync(file, "utf8")
   if (source.includes("HanoootWorkspace")) {
     throw new Error(`App route still imports/uses deleted HanoootWorkspace: ${path.relative(root, file)}`)
+  }
+  if (source.includes("HanoootPage")) {
+    throw new Error(`App route still imports/uses renamed HanoootPage: ${path.relative(root, file)}`)
   }
 }
 
@@ -90,7 +100,7 @@ for (const table of requiredTables) {
   }
 }
 
-const workspace = fs.readFileSync(path.join(root, "src/components/hanooot/HanoootPage.tsx"), "utf8")
+const workspace = fs.readFileSync(path.join(root, "src/app/_hanooot/HanoootScreen.tsx"), "utf8") + "\n" + fs.readFileSync(path.join(root, "src/app/_hanooot/hanooot-data.ts"), "utf8")
 for (const text of ["Overview", "Importing", "Settings", "Messages", "Drive", "HR", "Legal", "SIGNED IN AS", "REPORT A BUG"]) {
   if (!workspace.includes(text)) {
     throw new Error(`Native workspace missing UI text: ${text}`)
@@ -108,13 +118,18 @@ for (const text of forbiddenChecklist) {
 }
 
 const requiredRenderedScreens = [
-  'data-native-screen="overview-activity"',
-  'data-native-screen="importing-trade-operations"',
-  'data-native-screen="settings-authority-finance"',
-  'data-native-screen="messages-thread-record-history"',
-  'data-native-screen="drive-upload-linked-documents"',
-  'data-native-screen="hr-people-payroll-documents"',
-  'data-native-screen="legal-client-services-documents"',
+  'data-native-screen={`${activeModule.id}-native-screen`}',
+  "Reference details implemented in code",
+  "Importing Service",
+  "Amman — Head office",
+  "Aqaba — Port office",
+  "Dubai — Trade desk",
+  "Mustafa Waiz",
+  "Mohammed Alwaidh",
+  "Qadri Auto Parts",
+  "Mansour Group",
+  "Shenzhen Yuhua",
+  "AUGUST 2026 RUN",
   "Target picker",
   "Severity",
   "New deal modal",
@@ -165,7 +180,7 @@ for (const file of requiredAppRoutes) {
 }
 
 
-const workspaceSource = fs.readFileSync(path.join(root, "src/components/hanooot/HanoootPage.tsx"), "utf8")
+const workspaceSource = fs.readFileSync(path.join(root, "src/app/_hanooot/HanoootScreen.tsx"), "utf8") + "\n" + fs.readFileSync(path.join(root, "src/app/_hanooot/hanooot-data.ts"), "utf8")
 if (workspaceSource.includes("hanooot-standalone")) {
   throw new Error("Native app source must not reference the standalone HTML asset")
 }
