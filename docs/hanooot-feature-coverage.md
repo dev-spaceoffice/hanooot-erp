@@ -2,7 +2,7 @@
 
 ## Current implementation
 
-The Hanooot ERP frontend is now implemented as native Next.js App Router pages under `src/app/`. The bundled standalone HTML reference file is not stored in the repo and is not imported, iframe-rendered, or used by runtime code.
+The Hanooot ERP frontend is now implemented as native Next.js App Router pages under `src/app/`, supported by reusable Hanooot UI component code under `src/components/hanooot/`. The old `HanoootWorkspace.tsx` file has been deleted. The bundled standalone HTML reference file is not stored in the repo and is not imported, iframe-rendered, or used by runtime code.
 
 ## App routes
 
@@ -28,4 +28,4 @@ The Hanooot ERP frontend is now implemented as native Next.js App Router pages u
 
 ## Validation
 
-`npm test` verifies the native route set, rejects the old standalone HTML asset and iframe/checklist approaches, checks concrete rendered-screen markers, and confirms Supabase schema coverage. `npm run lint` and `npm run build` are required before review handoff.
+`npm test` verifies the native route set, rejects the old standalone HTML asset, rejects the deleted `HanoootWorkspace.tsx` path/imports, rejects iframe/checklist approaches, checks concrete rendered-screen markers, and confirms Supabase schema coverage. `npm run lint` and `npm run build` are required before review handoff.

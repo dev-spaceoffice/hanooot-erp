@@ -1,5 +1,5 @@
-import HanoootWorkspace from "@/sections/hanooot/HanoootWorkspace"
+import HanoootPage from "@/components/hanooot/HanoootPage"
 
-const Page = () => <HanoootWorkspace detailSurface="Messages · People" moduleId="messages" />
+const Page = () => <HanoootPage detailSurface="Messages · People" moduleId="messages" />
 
 export default Page

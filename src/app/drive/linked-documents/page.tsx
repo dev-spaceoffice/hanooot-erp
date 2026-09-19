@@ -1,5 +1,5 @@
-import HanoootWorkspace from "@/sections/hanooot/HanoootWorkspace"
+import HanoootPage from "@/components/hanooot/HanoootPage"
 
-const Page = () => <HanoootWorkspace detailSurface="Drive · Linked Documents" moduleId="drive" />
+const Page = () => <HanoootPage detailSurface="Drive · Linked Documents" moduleId="drive" />
 
 export default Page

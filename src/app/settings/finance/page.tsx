@@ -1,5 +1,5 @@
-import HanoootWorkspace from "@/sections/hanooot/HanoootWorkspace"
+import HanoootPage from "@/components/hanooot/HanoootPage"
 
-const Page = () => <HanoootWorkspace detailSurface="Settings · Finance" moduleId="settings" />
+const Page = () => <HanoootPage detailSurface="Settings · Finance" moduleId="settings" />
 
 export default Page

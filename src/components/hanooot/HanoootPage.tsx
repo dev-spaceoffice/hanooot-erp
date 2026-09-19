@@ -494,12 +494,12 @@ const ModuleView = ({ page, detailSurface }: { page: ModulePage; detailSurface?:
   </div>
 )
 
-type HanoootWorkspaceProps = {
+type HanoootPageProps = {
   moduleId?: ModuleId
   detailSurface?: string
 }
 
-const HanoootWorkspace = ({ moduleId = "overview", detailSurface }: HanoootWorkspaceProps) => {
+const HanoootPage = ({ moduleId = "overview", detailSurface }: HanoootPageProps) => {
   const activeId = moduleId
   const [rolesOpen, setRolesOpen] = useState(false)
   const [bugOpen, setBugOpen] = useState(false)
@@ -551,4 +551,4 @@ const HanoootWorkspace = ({ moduleId = "overview", detailSurface }: HanoootWorks
   )
 }
 
-export default HanoootWorkspace
+export default HanoootPage
