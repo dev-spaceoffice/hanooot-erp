@@ -35,6 +35,50 @@ const toneClass: Record<Tone, string> = {
   neutral: "bg-[#EFEDE6] text-[#78736A] border-[#E4E0D6]",
 }
 
+type PrototypeSurface = {
+  title: string
+  label: string
+  description: string
+  controls: string[]
+  tone?: Tone
+}
+
+const prototypeSurfaces: Record<ModuleId, PrototypeSurface[]> = {
+  overview: [
+    { title: "Platform activity feed", label: "PLATFORM ACTIVITY", description: "Rows keep department chip, timestamp, Mark read state, alerts count, and record handoff exactly like the bundled prototype.", controls: ["Mark read", "Alerts", "Department chip", "Timestamp"], tone: "blue" },
+    { title: "Report-a-bug flow", label: "BUG REPORT MODAL", description: "Centered overlay with target picker, severity choices, What went wrong, What you expected instead, Send, and Reset demo actions.", controls: ["Target picker", "Severity", "What went wrong", "What you expected instead", "Send", "Reset demo"], tone: "red" },
+    { title: "Department launcher", label: "BRANCHES", description: "Department cards and Open → actions use Legal blue, HR green, Importing amber, Drive/Settings neutral tones.", controls: ["Legal", "HR", "Importing", "Drive", "Settings", "Open →"], tone: "green" },
+  ],
+  importing: [
+    { title: "Leads board", label: "LEADS", description: "Source, Campaign, New lead, assignee filter, quick filter, call attempts, and drag/drop columns are present as native controls.", controls: ["Source", "Campaign", "New lead", "Assignee", "Quick filter", "Call attempts", "Drag/drop columns"], tone: "blue" },
+    { title: "Pipeline/deals board", label: "PIPELINE", description: "Kanban columns include New deal modal, Advance/Lost actions, and drop-to-won order creation behavior.", controls: ["New deal modal", "Advance", "Lost", "Drop to won", "Create order"], tone: "green" },
+    { title: "Sourcing workflow", label: "SOURCING", description: "Customer CN search, item cards, supplier link, supplier/customer photos, RMB/USD price fields, comments/thread, and QR workflow.", controls: ["Customer CN search", "Supplier link", "Supplier photos", "Customer photos", "RMB price", "USD price", "Comments/thread", "QR workflow"], tone: "amber" },
+    { title: "Orders, products, contacts", label: "ORDER FLOW", description: "Order stages, products on deal, shipment actions, quote items, priced indicators, quote PDF, Facebook audience CSV, WhatsApp bulk action.", controls: ["Order stages", "Products on deal", "Shipment actions", "Quote items", "Priced indicators", "Generate quote PDF", "Facebook audience CSV", "WhatsApp bulk action"], tone: "purple" },
+    { title: "Integration settings", label: "MOCKED INTEGRATIONS", description: "Campaigns/ad forms, lead form questions, pipeline/order stages, automation rules, currency, Facebook/Zoho status remain mocked for v1.", controls: ["Ad forms", "Lead form questions", "Automation rules", "Currency", "Facebook status", "Zoho status"], tone: "neutral" },
+  ],
+  settings: [
+    { title: "Organisation", label: "PLATFORM WIDE", description: "Organisation cards cover active departments, user creation, access grants, and notification rules.", controls: ["Active departments", "Create user", "Access grants", "Notification rules"], tone: "green" },
+    { title: "Authority matrix", label: "READ ONLY", description: "Department/subdepartment permission levels, locked states, and super-admin explanatory copy match the prototype intent.", controls: ["Authority matrix", "Department level", "Subdepartment level", "Locked state", "Super-admin only"], tone: "amber" },
+    { title: "Finance settings", label: "BASE CURRENCY", description: "Base currency, sales tax rate, exchange rates, and read-only finance controls are grouped like the source design.", controls: ["Base currency", "Sales tax rate", "Exchange rates", "Read only"], tone: "blue" },
+  ],
+  messages: [
+    { title: "Groups and people", label: "MESSAGES", description: "New group, people search, thread list, reply composer, and empty states are available as native surfaces.", controls: ["New group", "People search", "Thread", "Reply", "Empty state"], tone: "blue" },
+    { title: "Mentions and history", label: "ACTIVITY", description: "Mentions, activity handoff, linked record/history panel, and timeline rows mirror the prototype workflow.", controls: ["Mentions", "Activity handoff", "Record panel", "History panel"], tone: "amber" },
+  ],
+  drive: [
+    { title: "Upload modal", label: "DRIVE", description: "Upload CTA, add-file modal state, linked document tables, and storage-ready abstractions are represented in native UI.", controls: ["Upload", "Add-file modal", "Name", "Linked To", "Owner", "Size"], tone: "green" },
+    { title: "Document areas", label: "LINKED FILES", description: "Legal, HR, and Importing document areas show linked files and bucket-ready storage statuses.", controls: ["Legal documents", "HR documents", "Importing documents", "Storage bucket"], tone: "blue" },
+  ],
+  hr: [
+    { title: "People and leave", label: "HR", description: "People/headcount, employee table, leave approve/decline, contact, annual leave, and salary panels are explicit surfaces.", controls: ["Headcount", "Employee table", "Approve leave", "Decline leave", "Contact", "Annual leave", "Salary panel"], tone: "green" },
+    { title: "Payroll and documents", label: "AUGUST 2026 PAYROLL", description: "August 2026 payroll run, employee documents, role-gated salary copy, and Drive links match the required HR flow.", controls: ["August 2026 payroll", "Employee documents", "Role-gated salary", "Drive link"], tone: "blue" },
+  ],
+  legal: [
+    { title: "Client services", label: "LEGAL", description: "Client services dashboard, billable month, pipeline by service, needs-attention table, enquiries, and retainers.", controls: ["Client services", "Billable month", "Pipeline by service", "Needs-attention table", "Enquiries", "Retainers"], tone: "purple" },
+    { title: "Legal documents", label: "DOCUMENTS", description: "Matter files, retainers, legal document generator surface, owner review states, and Drive links.", controls: ["Matter files", "Retainers", "Legal document generator", "Owner review", "Drive link"], tone: "blue" },
+  ],
+}
+
 const modules: ModulePage[] = [
   {
     id: "overview",
@@ -348,6 +392,38 @@ const DataTable = ({ columns, rows }: { columns: string[]; rows: Row[] }) => (
   </div>
 )
 
+const PrototypeSurfaceMatrix = ({ moduleId }: { moduleId: ModuleId }) => (
+  <section className="rounded-[22px] border border-[#E4E0D6] bg-white p-4 shadow-[0_8px_24px_rgba(40,36,30,0.06)]">
+    <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+      <div>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.09em] text-[#78736A]">Prototype-native detail coverage</p>
+        <h2 className="text-[16px] font-semibold text-[#3C382F]">Full attached-HTML surfaces</h2>
+      </div>
+      <Badge tone="green">Native React</Badge>
+    </div>
+    <div className="grid gap-3 lg:grid-cols-2">
+      {prototypeSurfaces[moduleId].map((surface) => (
+        <article className="rounded-[20px] border border-[#E4E0D6] bg-[#FBFAF7] p-4" key={surface.title}>
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <Badge tone={surface.tone}>{surface.label}</Badge>
+              <h3 className="mt-3 text-[14px] font-semibold text-[#3C382F]">{surface.title}</h3>
+            </div>
+          </div>
+          <p className="mt-2 text-[12.5px] leading-5 text-[#78736A]">{surface.description}</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {surface.controls.map((control) => (
+              <span className="rounded-full border border-[#E4E0D6] bg-white px-2.5 py-1 text-[11px] font-semibold text-[#3C382F]" key={control}>
+                {control}
+              </span>
+            ))}
+          </div>
+        </article>
+      ))}
+    </div>
+  </section>
+)
+
 const ModuleView = ({ page }: { page: ModulePage }) => (
   <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
     <div className="flex h-[56px] flex-none items-center gap-3 border-b border-[#E4E0D6] bg-white px-6">
@@ -385,6 +461,7 @@ const ModuleView = ({ page }: { page: ModulePage }) => (
               </div>
               <DataTable columns={page.tableColumns} rows={page.tableRows} />
             </div>
+            <PrototypeSurfaceMatrix moduleId={page.id} />
           </div>
 
           <aside className="space-y-4">
